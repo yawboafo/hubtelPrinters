@@ -160,7 +160,7 @@ public class PrinterManager {
 
 
         }
-        private void bluetoothConnectLogic(){
+        private  void bluetoothConnectLogic(){
             AsyncTask<Void, Void, List<PortInfo>> task = new  AsyncTask<Void, Void, List<PortInfo>>() {
 
 
@@ -199,6 +199,7 @@ public class PrinterManager {
                 protected void onPostExecute(List<PortInfo> result){
                     super.onPostExecute(result);
 
+                    Log.d("Devices","dives "+result.toString());
 
                     if(result.size()==0)
                         delegate.printerSearchReturnZeroResults();
@@ -257,9 +258,11 @@ public class PrinterManager {
                 if(port != null){
 
                     return port;
+
                 }else{
                     try {
                         synchronized (activity) {
+
                             port = StarIOPort.getPort(printerModel.getPortName(), printerModel.getPortSettings(), 10000,activity);
                         }
                     } catch (StarIOPortException e) {
@@ -369,7 +372,7 @@ public class PrinterManager {
 
 
 
-    public static byte[] openCashDrawar(StarIoExt.Emulation emulation, ICommandBuilder.PeripheralChannel channel) {
+    private static byte[] openCashDrawar(StarIoExt.Emulation emulation, ICommandBuilder.PeripheralChannel channel) {
         ICommandBuilder builder = StarIoExt.createCommandBuilder(emulation);
 
         builder.beginDocument();

@@ -1,1 +1,1 @@
-include ':app', ':hubtelprinters', ':starioextension', ':StarIOPort3.1'
+include ':app', ':hubtelprinters', ':starioextension', ':StarIOPort3.1', ':ePOS2'
