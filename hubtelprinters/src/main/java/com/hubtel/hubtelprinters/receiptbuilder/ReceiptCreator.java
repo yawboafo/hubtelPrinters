@@ -101,6 +101,11 @@ public class ReceiptCreator {
         return this;
     }
 
+
+
+
+
+
     public ReceiptCreator addText(String text) {
 
         if ( text == null ||  text.isEmpty() || text.contains("null")){
@@ -299,9 +304,9 @@ public class ReceiptCreator {
             drawerImage.setAlign(align);
         }
 
-        if (drawerImage!=null) {
+
             listItens.add(drawerImage);
-        }
+
         return this;
     }
     public ReceiptCreator addLogo(Bitmap bitmap) {

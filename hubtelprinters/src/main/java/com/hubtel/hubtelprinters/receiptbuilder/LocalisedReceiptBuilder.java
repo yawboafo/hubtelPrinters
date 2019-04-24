@@ -62,10 +62,10 @@ public class LocalisedReceiptBuilder {
                 .addTextCenter(object.getBusinessName())
                 .setTextSize(20)
                 .setTypeface(getNormalTypeFace())
-                .addText(object.getBusinessBranch()+"\n")
-                .addText(object.getBusinessPhone()+"\n")
-                .addText(object.getBusinessAddress()+"\n")
-                .addText(object.getBusinessWebUrl()+"\n")
+                .addTextCenter(object.getBusinessBranch()+"\n")
+                .addTextCenter(object.getBusinessPhone()+"\n")
+                .addTextCenter(object.getBusinessAddress()+"\n")
+                .addTextCenter(object.getBusinessWebUrl()+"\n")
                 .addParagraph()
                 .setTextSize(20)
                 .setTypeface(getBoldTypeFace())
@@ -79,6 +79,7 @@ public class LocalisedReceiptBuilder {
                 .addTextLeft(itemizedListHeader)
                 .addParagraph()
                 .addLine()
+                .setAlign(Paint.Align.LEFT)
                 .addImage(givemeListString(object.getItems()))
                 .addParagraph()
                 .addLine()
@@ -90,22 +91,10 @@ public class LocalisedReceiptBuilder {
                 .addParagraph()
                 .addLine()
                 .addParagraph()
-                .setAlign(Paint.Align.LEFT).
-                addText("Total", false).
-                setAlign(Paint.Align.RIGHT).
-                addText(object.getTotal())
-                .setAlign(Paint.Align.LEFT).
-                addText("Amount Paid", false).
-                setAlign(Paint.Align.RIGHT).
-                addText(object.getAmountPaid())
-                .setAlign(Paint.Align.LEFT).
-                addText("Change", false).
-                setAlign(Paint.Align.RIGHT).
-                addText(object.getChange())
-                .setAlign(Paint.Align.LEFT).
-                addText("Gratis Reward", false).
-                setAlign(Paint.Align.RIGHT).
-                addText(object.getGratisPoint())
+                .addTextRightAndLeft("Total",object.getTotal())
+                .addTextRightAndLeft("Amount Paid",object.getAmountPaid())
+                .addTextRightAndLeft("Change",object.getChange())
+                .addTextRightAndLeft("Gratis Reward",object.getGratisPoint())
                 .addParagraph()
                 .addLine()
                 .setAlign(Paint.Align.CENTER)

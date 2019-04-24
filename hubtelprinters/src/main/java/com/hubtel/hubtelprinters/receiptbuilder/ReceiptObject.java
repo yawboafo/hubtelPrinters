@@ -5,7 +5,6 @@ package com.hubtel.hubtelprinters.receiptbuilder;
 import android.graphics.Bitmap;
 import android.support.annotation.NonNull;
 
-import com.hubtel.hubtelprinters.Ray;
 
 import java.util.List;
 
