@@ -67,6 +67,8 @@ public class LocalisedReceiptBuilder {
                 .addTextCenter(object.getBusinessAddress()+"\n")
                 .addTextCenter(object.getBusinessWebUrl()+"\n")
                 .addParagraph()
+                .addParagraph()
+                .addTextCenter(object.isDuplicate())
                 .setTextSize(20)
                 .setTypeface(getBoldTypeFace())
                 .addTextLeft("Date :  "+ object.getPaymentDate()+"\n")
@@ -97,14 +99,18 @@ public class LocalisedReceiptBuilder {
                 .addTextRightAndLeft("Gratis Reward",object.getGratisPoint())
                 .addParagraph()
                 .addLine()
-                .setAlign(Paint.Align.CENTER)
-                .addParagraph().addText("Served by "+ object.getEmployeeName())
+                .setTypeface(getNormalTypeFace())
+                .setTextSize(19)
+                .addCardDetails(object.getCardDetails())
+                .addParagraph()
+                .addTextCenter("Served by "+ object.getEmployeeName())
                 .addParagraph()
                 .setTypeface(getBoldTypeFace()).
                 setTextSize(19).
-                addText("Scan QR code to redeem rewards").
-                addText("and get the e-receipt").
+                addTextCenter("Scan QR code to redeem rewards").
+                addTextCenter("and get the e-receipt").
                 addParagraph()
+                .setAlign(Paint.Align.CENTER)
                 .addImage(object.getQrcode())
                 .addParagraph()
                 .addTextCenter("Processed by Hubtel")

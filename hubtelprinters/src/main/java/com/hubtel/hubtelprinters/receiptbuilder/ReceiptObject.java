@@ -35,6 +35,7 @@ public class ReceiptObject {
 
     private  Bitmap qrcode;
     private  String customer;
+    private  boolean isDuplicate;
 
     private CardDetails cardDetails;
 
@@ -212,6 +213,14 @@ public class ReceiptObject {
 
     public void setCardDetails(CardDetails cardDetails) {
         this.cardDetails = cardDetails;
+    }
+
+    public String isDuplicate() {
+        return (isDuplicate == true ? "(DUPLICATE)": "" );
+    }
+
+    public void setDuplicate(boolean duplicate) {
+        isDuplicate = duplicate;
     }
 }
 

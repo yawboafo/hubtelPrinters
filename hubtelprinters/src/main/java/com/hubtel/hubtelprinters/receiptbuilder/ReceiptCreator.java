@@ -276,11 +276,18 @@ public class ReceiptCreator {
 
     public ReceiptCreator addCardDetails(CardDetails cardDetails) {
 
-        if ( cardDetails == null ||  cardDetails.getCard().isEmpty() || cardDetails.getCard().contains("null")){
+
+
+
+
+        if ( cardDetails == null ||  cardDetails.getCard() == null || cardDetails.getCard().isEmpty()){
             return  this;
         }
 
-        CreateText schema = new CreateText(cardDetails.getSchema());
+
+        listItens.add(new CreateBlankSpace((int) textSize));
+
+        CreateText schema = new CreateText("Schema  : "+cardDetails.getSchema());
         schema.setTextSize(this.textSize);
         schema.setColor(this.color);
         schema.setNewLine(true);
@@ -288,14 +295,14 @@ public class ReceiptCreator {
             schema.setTypeface(typeface);
         }
 
-        schema.setAlign(Paint.Align.CENTER);
+        schema.setAlign(Paint.Align.LEFT);
 
 
         listItens.add(schema);
 
 
 
-        CreateText card = new CreateText(cardDetails.getCard());
+        CreateText card = new CreateText("Card #  : "+cardDetails.getCard());
         card.setTextSize(this.textSize);
         card.setColor(this.color);
         card.setNewLine(true);
@@ -303,7 +310,7 @@ public class ReceiptCreator {
             card.setTypeface(typeface);
         }
 
-        card.setAlign(Paint.Align.CENTER);
+        card.setAlign(Paint.Align.LEFT);
 
 
         listItens.add(card);
@@ -311,7 +318,7 @@ public class ReceiptCreator {
 
 
 
-        CreateText tid = new CreateText(cardDetails.getTid());
+        CreateText tid = new CreateText("TID  : "+cardDetails.getTid());
         tid.setTextSize(this.textSize);
         tid.setColor(this.color);
         tid.setNewLine(true);
@@ -319,7 +326,7 @@ public class ReceiptCreator {
             tid.setTypeface(typeface);
         }
 
-        tid.setAlign(Paint.Align.CENTER);
+        tid.setAlign(Paint.Align.LEFT);
 
 
         listItens.add(tid);
@@ -327,7 +334,7 @@ public class ReceiptCreator {
 
 
 
-        CreateText author = new CreateText(cardDetails.getAuthorization());
+        CreateText author = new CreateText("Authorization  : "+cardDetails.getAuthorization());
         author.setTextSize(this.textSize);
         author.setColor(this.color);
         author.setNewLine(true);
@@ -335,11 +342,11 @@ public class ReceiptCreator {
             author.setTypeface(typeface);
         }
 
-        author.setAlign(Paint.Align.CENTER);
+        author.setAlign(Paint.Align.LEFT);
         listItens.add(author);
 
 
-        CreateText mid = new CreateText(cardDetails.getMid());
+        CreateText mid = new CreateText("MID  : "+cardDetails.getMid());
         mid.setTextSize(this.textSize);
         mid.setColor(this.color);
         mid.setNewLine(true);
@@ -347,12 +354,12 @@ public class ReceiptCreator {
             mid.setTypeface(typeface);
         }
 
-        mid.setAlign(Paint.Align.CENTER);
+        mid.setAlign(Paint.Align.LEFT);
         listItens.add(mid);
 
 
 
-        CreateText transID = new CreateText(cardDetails.getTransID());
+        CreateText transID = new CreateText("Transaction ID  : "+cardDetails.getTransID());
         transID.setTextSize(this.textSize);
         transID.setColor(this.color);
         transID.setNewLine(true);
@@ -360,9 +367,17 @@ public class ReceiptCreator {
             transID.setTypeface(typeface);
         }
 
-        transID.setAlign(Paint.Align.CENTER);
+        transID.setAlign(Paint.Align.LEFT);
         listItens.add(transID);
 
+
+
+        listItens.add(new CreateBlankSpace((int) textSize));
+
+        CreateLine line = new CreateLine(width - marginRight - marginLeft);
+        line.setAlign(align);
+        line.setColor(color);
+        listItens.add(line);
 
         return this;
     }
@@ -372,7 +387,7 @@ public class ReceiptCreator {
     public ReceiptCreator addTextCenter(String text) {
 
         if ( text == null ||  text.isEmpty() || text.contains("null")){
-           return  this;
+            return  this;
         }
 
         CreateText drawerText = new CreateText(text);
@@ -390,6 +405,8 @@ public class ReceiptCreator {
 
         return this;
     }
+
+
 
     public ReceiptCreator addImage(Bitmap bitmap) {
         if (bitmap == null)

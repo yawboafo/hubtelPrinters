@@ -9,6 +9,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
+import com.hubtel.hubtelprinters.CardDetails;
 import com.hubtel.hubtelprinters.Communication;
 import com.hubtel.hubtelprinters.PrinterManager;
 import com.hubtel.hubtelprinters.PrinterManagerDelegate;
@@ -118,6 +119,21 @@ public class MainActivity extends AppCompatActivity implements PrinterManagerDel
 
 
          List<ReceiptOrderItem> items = new ArrayList<>();
+         items.add(new ReceiptOrderItem("21","Yam Balls banana ","GHS 12.00"));
+         items.add(new ReceiptOrderItem("3","Yam Balls pizza ","GHS 300.00"));
+         items.add(new ReceiptOrderItem("331","Rabbit ","GHS 300.00"));
+         items.add(new ReceiptOrderItem("21","The men of the league ","GHS 300.00"));
+         items.add(new ReceiptOrderItem("10","Yam Balls ","GHS 300.00"));
+         items.add(new ReceiptOrderItem("1","Yam Balls banana ","GHS 300.00"));
+         items.add(new ReceiptOrderItem("1","Yam Balls pizza ","GHS 300.00"));
+         items.add(new ReceiptOrderItem("1","Rabbit ","GHS 300.00"));
+         items.add(new ReceiptOrderItem("1","The men of the league ","GHS 300.00"));
+         items.add(new ReceiptOrderItem("1","Yam Balls ","GHS 300.00"));
+         items.add(new ReceiptOrderItem("1","Yam Balls banana ","GHS 1,300.00"));
+         items.add(new ReceiptOrderItem("1","Yam Balls pizza ","GHS 1,300.00"));
+         items.add(new ReceiptOrderItem("1","Rabbit ","GHS 30,000.00"));
+         items.add(new ReceiptOrderItem("1","The men of the league ","GHS 300.00"));
+         items.add(new ReceiptOrderItem("1","Yam Balls ","GHS 300.00"));
          items.add(new ReceiptOrderItem("1","Yam Balls banana ","GHS 300.00"));
          items.add(new ReceiptOrderItem("1","Yam Balls pizza ","GHS 300.00"));
          items.add(new ReceiptOrderItem("1","Rabbit ","GHS 300.00"));
@@ -145,6 +161,19 @@ public class MainActivity extends AppCompatActivity implements PrinterManagerDel
          _object.setChange("GHS 90.00");
          _object.setTotal("GHS 1,090.00");
          _object.setEmployeeName("Apostle Boafo");
+        _object.setCustomer("0540256631");
+
+         CardDetails cardDetails = new CardDetails();
+         cardDetails.setAuthorization("98989");
+         cardDetails.setMid("191910022");
+         cardDetails.setCard("98911****89");
+         cardDetails.setSchema("Visa");
+         cardDetails.setTransID("32HDD333D999D");
+         cardDetails.setTid("ZHUB232");
+
+
+         _object.setCardDetails(cardDetails);
+
 
          Bitmap myLogo = BitmapFactory.decodeResource(MainActivity.this.getResources(), R.drawable.hubtel);
          Bitmap bMapScaled = Bitmap.createScaledBitmap(myLogo, 150, 150, true);
