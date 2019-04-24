@@ -22,7 +22,12 @@ import com.starmicronics.stario.StarIOPort;
 import com.starmicronics.stario.StarIOPortException;
 import com.starmicronics.starioextension.ICommandBuilder;
 import com.starmicronics.starioextension.StarIoExt;
+import com.epson.epos2.discovery.Discovery;
+import com.epson.epos2.discovery.DiscoveryListener;
+import com.epson.epos2.discovery.FilterOption;
+import com.epson.epos2.discovery.DeviceInfo;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -36,7 +41,7 @@ public class PrinterManager {
     private Context mContext;
     private List<PrinterModel> printermodelList;
     private int mAllReceiptSettings;
-
+    private FilterOption mFilterOption = null;
 
 
     private int       mModelIndex;
@@ -48,6 +53,7 @@ public class PrinterManager {
     private int       mPaperSize;
     private Activity activity;
     private List<PortInfo> portList;
+    private  List<HubtelDeviceInfo> hubtelDeviceInfoList;
     private static PortInfo activePortInfo;
     public PrinterManagerDelegate delegate=null;
 
@@ -65,7 +71,11 @@ public class PrinterManager {
 
 
      public PrinterManager(Activity activity){
+
+
+
         portList = Collections.emptyList();
+        hubtelDeviceInfoList = new ArrayList<>();
         this.activity = activity;
         mContext = activity;
 
@@ -109,7 +119,7 @@ public class PrinterManager {
                  this.mPortName.substring(PrinterConstants.IF_TYPE_BLUETOOTH.length());
     }
 
-    public  void  connectToStarPrinter(PortInfo portInfo){
+    public  void  connectToStarPrinter(HubtelDeviceInfo portInfo){
 
 
 
@@ -152,7 +162,12 @@ public class PrinterManager {
                 != PackageManager.PERMISSION_GRANTED) {
             delegate.printerSearchFailed("Bluetooth Permission not granted");
         }else{
-            bluetoothConnectLogic();
+
+
+
+            searchepsonPrinters();
+
+            //searchStarPrinters();
         }
 
 
@@ -160,7 +175,7 @@ public class PrinterManager {
 
 
         }
-        private  void bluetoothConnectLogic(){
+        private  void searchStarPrinters(){
             AsyncTask<Void, Void, List<PortInfo>> task = new  AsyncTask<Void, Void, List<PortInfo>>() {
 
 
@@ -199,12 +214,21 @@ public class PrinterManager {
                 protected void onPostExecute(List<PortInfo> result){
                     super.onPostExecute(result);
 
-                    Log.d("Devices","dives "+result.toString());
 
-                    if(result.size()==0)
-                        delegate.printerSearchReturnZeroResults();
-                    else
-                        delegate.printerSearchSuccess(result);
+                    if(result.size() > 0)
+                    addStarPortToListofHubtelDeviceInfo(result);
+
+
+                    searchepsonPrinters();
+
+
+
+                  //  Log.d("Devices","dives "+result.toString());
+
+                   // if(result.size()==0)
+                   //     delegate.printerSearchReturnZeroResults();
+                  //  else
+                  //      delegate.printerSearchSuccess(result);
                 }
 
             };
@@ -367,7 +391,77 @@ public class PrinterManager {
 
 
 
+     private void addStarPortToListofHubtelDeviceInfo(List<PortInfo> list){
 
+         //    public HubtelDeviceInfo(int deviceType, String target,
+         //    String deviceName, String ipAddress, String macAddress,
+         //    String bdAddress, String portName, String USBSerialNumber,
+         //    String devicemanufacturer) {
+
+         for (PortInfo info : list){
+
+             hubtelDeviceInfoList.add(new HubtelDeviceInfo(
+                     0,
+                     "",
+                      info.getModelName(),
+                     "",
+                      info.getMacAddress(),
+                     "",
+                       info.getPortName(),
+                       info.getUSBSerialNumber(),
+                     "Star Micronics"));
+
+
+         }
+
+
+     }
+
+
+    private void searchepsonPrinters(){
+
+
+
+     FilterOption   mFilterOption = new FilterOption();
+        mFilterOption.setDeviceType(Discovery.TYPE_PRINTER);
+        mFilterOption.setEpsonFilter(Discovery.FILTER_NAME);
+        try {
+            Discovery.start(activity, mFilterOption, mDiscoveryListener);
+        }
+        catch (Exception e) {
+
+            delegate.printerSearchFailed(e.getLocalizedMessage()+"epson");
+
+        }
+    }
+    final DiscoveryListener mDiscoveryListener = new DiscoveryListener() {
+        @Override
+        public void onDiscovery(final DeviceInfo deviceInfo) {
+
+
+            HubtelDeviceInfo hubtelDeviceInfo = new HubtelDeviceInfo();
+
+
+            hubtelDeviceInfo.setDeviceName(deviceInfo.getDeviceName());
+            hubtelDeviceInfo.setBdAddress(deviceInfo.getBdAddress());
+            hubtelDeviceInfo.setDeviceType(deviceInfo.getDeviceType());
+            hubtelDeviceInfo.setIpAddress(deviceInfo.getIpAddress());
+            hubtelDeviceInfo.setMacAddress(deviceInfo.getMacAddress());
+            hubtelDeviceInfo.setTarget(deviceInfo.getTarget());
+            hubtelDeviceInfo.setBdAddress(deviceInfo.getBdAddress());
+            hubtelDeviceInfo.setDeviceManufacturer("Epson");
+
+
+
+            hubtelDeviceInfoList.add(hubtelDeviceInfo);
+
+
+
+            delegate.printerSearchSuccess(hubtelDeviceInfoList);
+
+
+        }
+    };
 
 
 

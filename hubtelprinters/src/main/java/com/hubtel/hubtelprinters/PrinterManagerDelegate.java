@@ -8,7 +8,7 @@ import java.util.List;
 public interface PrinterManagerDelegate {
 
     void printerSearchBegan();
-    void printerSearchSuccess(List<PortInfo> portInfoList);
+    void printerSearchSuccess(List<HubtelDeviceInfo> hubtelDeviceInfoList);
     void printerSearchFailed(String error);
     void printerSearchReturnZeroResults();
 
