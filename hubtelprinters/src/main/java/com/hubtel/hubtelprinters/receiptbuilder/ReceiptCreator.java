@@ -407,6 +407,28 @@ public class ReceiptCreator {
     }
 
 
+    public ReceiptCreator addTextDuplicate(String text) {
+
+        if ( text == null ||  text.isEmpty() || text.contains("null")){
+            return  this;
+        }
+
+        CreateText drawerText = new CreateText(text);
+        drawerText.setTextSize(this.textSize);
+        drawerText.setColor(this.color);
+        drawerText.setNewLine(true);
+        if (typeface != null) {
+            drawerText.setTypeface(typeface);
+        }
+
+        drawerText.setAlign(Paint.Align.CENTER);
+
+
+        listItens.add(drawerText);
+
+        return this;
+    }
+
 
     public ReceiptCreator addImage(Bitmap bitmap) {
         if (bitmap == null)

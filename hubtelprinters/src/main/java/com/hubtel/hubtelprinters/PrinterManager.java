@@ -79,7 +79,10 @@ public class PrinterManager {
 
          printermodelList = JsonUtils.createPrinterSettingListFromJsonString(prefs.getString(PREF_KEY_PRINTER_SETTINGS_JSON, ""));
 
-         mAllReceiptSettings = prefs.getInt(PREF_KEY_ALLRECEIPTS_SETTINGS, 0);
+        if (printermodelList.size() > 0){
+
+            printerModel = getSavedPrinterModel();
+        }
     }
 
      public StarIOPort getPort() {
@@ -115,7 +118,7 @@ public class PrinterManager {
         this.mModelName = portInfo.getPortName().substring(PrinterConstants.IF_TYPE_BLUETOOTH.length());
         this.mModelIndex = PrinterModelCapacity.getModel( this.mModelName);
         this.mPortSettings = PrinterModelCapacity.getPortSettings(mModelIndex);
-
+        this.mDrawerOpenStatus = true ;
         if(portInfo.getMacAddress().startsWith("(") && portInfo.getMacAddress().endsWith(")"))
             this.mMacAddress = portInfo.getMacAddress().substring(1, portInfo.getMacAddress().length() - 1);
           else
@@ -207,6 +210,31 @@ public class PrinterManager {
             task.execute();
         }
 
+
+
+        public void openCashDrawar(){
+
+            ICommandBuilder.PeripheralChannel channel = ICommandBuilder.PeripheralChannel.No1;
+            StarIoExt.Emulation emulation = PrinterModelCapacity.getEmulation(getSavedPrinterModel().getModelIndex());
+
+
+            byte[] data = openCashDrawar(emulation, channel);
+
+
+
+            Communication.sendCommands(this, data, getSavedPrinterModel().getPortName(), getSavedPrinterModel().getPortSettings(), 10000, activity, new Communication.SendCallback() {
+                 @Override
+                 public void onStatus(boolean result, Communication.Result communicateResult) {
+
+
+                     Log.d("debug",communicateResult.toString());
+
+
+
+                     delegate.cashDrawertatusReport(communicateResult);
+                 }
+             });
+        }
 
     public void rawConnect() {
         AsyncTask<Void, Void, StarIOPort> task = new AsyncTask<Void, Void, StarIOPort>() {
@@ -325,6 +353,8 @@ public class PrinterManager {
         public void onStatus(boolean result, Communication.Result communicateResult) {
 
 
+
+
             delegate.printingStatusReport(communicateResult);
 
 
@@ -339,7 +369,17 @@ public class PrinterManager {
 
 
 
+    public static byte[] openCashDrawar(StarIoExt.Emulation emulation, ICommandBuilder.PeripheralChannel channel) {
+        ICommandBuilder builder = StarIoExt.createCommandBuilder(emulation);
 
+        builder.beginDocument();
+
+        builder.appendPeripheral(channel);
+
+        builder.endDocument();
+
+        return builder.getCommands();
+    }
 
 
 

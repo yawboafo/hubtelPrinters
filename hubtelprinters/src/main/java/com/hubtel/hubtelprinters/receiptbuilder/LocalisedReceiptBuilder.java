@@ -53,23 +53,25 @@ public class LocalisedReceiptBuilder {
 
 
 
-        receiptCreator.setMargin(2, 2).
+        receiptCreator.setMargin(1, 1).
                 setAlign(Paint.Align.CENTER).
                 setColor(Color.BLACK).
-                setTextSize(27)
+                setTextSize(25)
                 .setTypeface(getBoldTypeFace())
                 .addLogo(object.getLogo())
                 .addTextCenter(object.getBusinessName())
-                .setTextSize(20)
+                .setTextSize(19)
                 .setTypeface(getNormalTypeFace())
                 .addTextCenter(object.getBusinessBranch()+"\n")
                 .addTextCenter(object.getBusinessPhone()+"\n")
                 .addTextCenter(object.getBusinessAddress()+"\n")
                 .addTextCenter(object.getBusinessWebUrl()+"\n")
                 .addParagraph()
-                .addParagraph()
+                .setTypeface(getBoldTypeFace())
+                .setTextSize(25)
                 .addTextCenter(object.isDuplicate())
-                .setTextSize(20)
+                .addParagraph()
+                .setTextSize(19)
                 .setTypeface(getBoldTypeFace())
                 .addTextLeft("Date :  "+ object.getPaymentDate()+"\n")
                 .addTextLeft("Receipt No : "+ object.getPaymentReceiptNumber()+"\n")
@@ -179,7 +181,7 @@ public class LocalisedReceiptBuilder {
             else
                 itemName = item.getName();
 
-                itemizedList += String.format("%-5s %-30s %4s", item.getQuantity(), itemName, "  " +  item.getAmount()) + "\n";
+                itemizedList += String.format("%-5s %-27s %4s", item.getQuantity(), itemName, "  " +  item.getAmount()) + "\n";
         }
 
 

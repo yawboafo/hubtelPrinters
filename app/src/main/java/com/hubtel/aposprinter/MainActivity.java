@@ -109,11 +109,20 @@ public class MainActivity extends AppCompatActivity implements PrinterManagerDel
     public void printingStatusReport(Communication.Result communicateResult) {
 
 
+        if (communicateResult == Communication.Result.Success){
+
+            printerManager.openCashDrawar();
+        }
 
 
     }
 
-     void printsomething(){
+    @Override
+    public void cashDrawertatusReport(Communication.Result communicateResult) {
+
+    }
+
+    void printsomething(){
 
        ReceiptObject _object = new ReceiptObject();
 
@@ -130,7 +139,7 @@ public class MainActivity extends AppCompatActivity implements PrinterManagerDel
          items.add(new ReceiptOrderItem("1","The men of the league ","GHS 300.00"));
          items.add(new ReceiptOrderItem("1","Yam Balls ","GHS 300.00"));
          items.add(new ReceiptOrderItem("1","Yam Balls banana ","GHS 1,300.00"));
-         items.add(new ReceiptOrderItem("1","Yam Balls pizza ","GHS 1,300.00"));
+         items.add(new ReceiptOrderItem("1","Yam Balls pizza ","GHS 1,30,000.00"));
          items.add(new ReceiptOrderItem("1","Rabbit ","GHS 30,000.00"));
          items.add(new ReceiptOrderItem("1","The men of the league ","GHS 300.00"));
          items.add(new ReceiptOrderItem("1","Yam Balls ","GHS 300.00"));
@@ -162,8 +171,9 @@ public class MainActivity extends AppCompatActivity implements PrinterManagerDel
          _object.setTotal("GHS 1,090.00");
          _object.setEmployeeName("Apostle Boafo");
         _object.setCustomer("0540256631");
+        _object.setDuplicate(false);
 
-         CardDetails cardDetails = new CardDetails();
+      /**   CardDetails cardDetails = new CardDetails();
          cardDetails.setAuthorization("98989");
          cardDetails.setMid("191910022");
          cardDetails.setCard("98911****89");
@@ -173,7 +183,7 @@ public class MainActivity extends AppCompatActivity implements PrinterManagerDel
 
 
          _object.setCardDetails(cardDetails);
-
+**/
 
          Bitmap myLogo = BitmapFactory.decodeResource(MainActivity.this.getResources(), R.drawable.hubtel);
          Bitmap bMapScaled = Bitmap.createScaledBitmap(myLogo, 150, 150, true);

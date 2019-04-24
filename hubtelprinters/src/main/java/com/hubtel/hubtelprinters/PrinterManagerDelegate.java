@@ -18,5 +18,6 @@ public interface PrinterManagerDelegate {
     void printerConnectionSuccess(StarIOPort port);
     void printerConnectionFailed(String withError);
     void printingStatusReport(Communication.Result communicateResult);
+    void cashDrawertatusReport(Communication.Result communicateResult);
 
 }
