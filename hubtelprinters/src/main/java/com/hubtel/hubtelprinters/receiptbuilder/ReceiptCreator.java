@@ -7,6 +7,8 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Typeface;
 
+import com.hubtel.hubtelprinters.CardDetails;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -271,6 +273,101 @@ public class ReceiptCreator {
 
 
     }
+
+    public ReceiptCreator addCardDetails(CardDetails cardDetails) {
+
+        if ( cardDetails == null ||  cardDetails.getCard().isEmpty() || cardDetails.getCard().contains("null")){
+            return  this;
+        }
+
+        CreateText schema = new CreateText(cardDetails.getSchema());
+        schema.setTextSize(this.textSize);
+        schema.setColor(this.color);
+        schema.setNewLine(true);
+        if (typeface != null) {
+            schema.setTypeface(typeface);
+        }
+
+        schema.setAlign(Paint.Align.CENTER);
+
+
+        listItens.add(schema);
+
+
+
+        CreateText card = new CreateText(cardDetails.getCard());
+        card.setTextSize(this.textSize);
+        card.setColor(this.color);
+        card.setNewLine(true);
+        if (typeface != null) {
+            card.setTypeface(typeface);
+        }
+
+        card.setAlign(Paint.Align.CENTER);
+
+
+        listItens.add(card);
+
+
+
+
+        CreateText tid = new CreateText(cardDetails.getTid());
+        tid.setTextSize(this.textSize);
+        tid.setColor(this.color);
+        tid.setNewLine(true);
+        if (typeface != null) {
+            tid.setTypeface(typeface);
+        }
+
+        tid.setAlign(Paint.Align.CENTER);
+
+
+        listItens.add(tid);
+
+
+
+
+        CreateText author = new CreateText(cardDetails.getAuthorization());
+        author.setTextSize(this.textSize);
+        author.setColor(this.color);
+        author.setNewLine(true);
+        if (typeface != null) {
+            author.setTypeface(typeface);
+        }
+
+        author.setAlign(Paint.Align.CENTER);
+        listItens.add(author);
+
+
+        CreateText mid = new CreateText(cardDetails.getMid());
+        mid.setTextSize(this.textSize);
+        mid.setColor(this.color);
+        mid.setNewLine(true);
+        if (typeface != null) {
+            mid.setTypeface(typeface);
+        }
+
+        mid.setAlign(Paint.Align.CENTER);
+        listItens.add(mid);
+
+
+
+        CreateText transID = new CreateText(cardDetails.getTransID());
+        transID.setTextSize(this.textSize);
+        transID.setColor(this.color);
+        transID.setNewLine(true);
+        if (typeface != null) {
+            transID.setTypeface(typeface);
+        }
+
+        transID.setAlign(Paint.Align.CENTER);
+        listItens.add(transID);
+
+
+        return this;
+    }
+
+
 
     public ReceiptCreator addTextCenter(String text) {
 

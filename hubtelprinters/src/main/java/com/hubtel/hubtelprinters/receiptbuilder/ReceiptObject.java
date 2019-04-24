@@ -6,33 +6,37 @@ import android.graphics.Bitmap;
 import android.support.annotation.NonNull;
 
 
+import com.hubtel.hubtelprinters.CardDetails;
+
 import java.util.List;
 
 public class ReceiptObject {
 
 
 
-     String businessName;
-     String businessBranch;
-     String businessPhone;
-     String businessAddress;
-     String businessWebUrl;
-     String paymentDate;
-     String paymentReceiptNumber;
-     String paymentType;
-     Bitmap logo;
-     List<ReceiptOrderItem> items;
-     String subtotal;
-     String discount;
-     String tax;
-     String total;
-     String amountPaid;
-     String change;
-     String gratisPoint;
-     String employeeName;
+    private String businessName;
+    private String businessBranch;
+    private String businessPhone;
+    private  String businessAddress;
+    private  String businessWebUrl;
+    private  String paymentDate;
+    private  String paymentReceiptNumber;
+    private  String paymentType;
+    private  Bitmap logo;
+    private  List<ReceiptOrderItem> items;
+    private  String subtotal;
+    private  String discount;
+    private  String tax;
+    private  String total;
+    private  String amountPaid;
+    private  String change;
+    private  String gratisPoint;
+    private  String employeeName;
 
-     Bitmap qrcode;
-     String customer;
+    private  Bitmap qrcode;
+    private  String customer;
+
+    private CardDetails cardDetails;
 
 
     public ReceiptObject(){}
@@ -199,6 +203,15 @@ public class ReceiptObject {
 
     public void setCustomer(String customer) {
         this.customer = customer;
+    }
+
+
+    public CardDetails getCardDetails() {
+        return cardDetails;
+    }
+
+    public void setCardDetails(CardDetails cardDetails) {
+        this.cardDetails = cardDetails;
     }
 }
 
