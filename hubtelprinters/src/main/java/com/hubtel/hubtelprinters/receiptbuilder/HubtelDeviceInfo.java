@@ -1,4 +1,4 @@
-package com.hubtel.hubtelprinters;
+package com.hubtel.hubtelprinters.receiptbuilder;
 
 public class HubtelDeviceInfo {
 
@@ -99,6 +99,13 @@ public class HubtelDeviceInfo {
 
     public void setDeviceManufacturer(String deviceManufacturer) {
         this.deviceManufacturer = deviceManufacturer;
+    }
+
+
+
+    public String getHumanReadableName(){
+
+        return this.deviceManufacturer + " " + this.deviceName == null || this.deviceName.isEmpty() ? this.portName : this.deviceName;
     }
 }
 

@@ -1,4 +1,4 @@
-package com.hubtel.hubtelprinters;
+package com.hubtel.hubtelprinters.printerCore;
 
 
 
@@ -9,6 +9,7 @@ import com.starmicronics.stario.StarIOPort;
 @SuppressWarnings({"unused", "WeakerAccess"})
 public class PrinterModel {
 
+    private String mManufacturer;
     private int     mModelIndex;
     private String  mPortName;
     private String  mPortSettings;
@@ -17,7 +18,7 @@ public class PrinterModel {
     private boolean mCashDrawerOpenActiveHigh;
     private int     mPaperSize;
     private StarIOPort port = null;
-    public PrinterModel(int modelIndex, @NonNull String portName, @NonNull String portSettings, @NonNull String macAddress, @NonNull String modelName, boolean cashDrawerOpenActiveHigh, int paperSize) {
+    public PrinterModel(int modelIndex, @NonNull String manufacturer, @NonNull String portName, @NonNull String portSettings, @NonNull String macAddress, @NonNull String modelName, boolean cashDrawerOpenActiveHigh, int paperSize) {
         mModelIndex = modelIndex;
         mPortName   = portName;
         mPortSettings = portSettings;
@@ -25,6 +26,7 @@ public class PrinterModel {
         mModelName = modelName;
         mCashDrawerOpenActiveHigh = cashDrawerOpenActiveHigh;
         mPaperSize = paperSize;
+        mManufacturer = manufacturer;
     }
 
     public int getModelIndex() {
@@ -59,6 +61,13 @@ public class PrinterModel {
     public int getPaperSize() {
         return mPaperSize;
     }
+
+
+    public String getmManufacturer() {
+        return mManufacturer;
+    }
+
+
 }
 
 

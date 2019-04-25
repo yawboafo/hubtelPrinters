@@ -13,24 +13,19 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.Button;
-import android.widget.EditText;
+import android.widget.ListView;
 import android.widget.TextView;
 
-import com.epson.epos2.discovery.DeviceInfo;
-import com.epson.epos2.discovery.Discovery;
-import com.epson.epos2.discovery.DiscoveryListener;
-import com.epson.epos2.discovery.FilterOption;
-import com.hubtel.hubtelprinters.CardDetails;
-import com.hubtel.hubtelprinters.Communication;
-import com.hubtel.hubtelprinters.HubtelDeviceInfo;
+import com.hubtel.hubtelprinters.receiptbuilder.CardDetails;
+import com.hubtel.hubtelprinters.printerCore.Communication;
+import com.hubtel.hubtelprinters.receiptbuilder.HubtelDeviceInfo;
 import com.hubtel.hubtelprinters.PrinterManager;
 import com.hubtel.hubtelprinters.PrinterManagerDelegate;
 
 import com.hubtel.hubtelprinters.receiptbuilder.ReceiptObject;
 import com.hubtel.hubtelprinters.receiptbuilder.ReceiptOrderItem;
-import com.starmicronics.stario.PortInfo;
-import com.starmicronics.stario.StarIOPort;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -38,14 +33,40 @@ import java.util.List;
 public class MainActivity extends AppCompatActivity implements PrinterManagerDelegate {
     PrinterManager printerManager;
     private static final int REQUEST_PERMISSION = 100;
+    private ListView listView;
+    private DeviceAdapter mAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        printerManager = new PrinterManager(MainActivity.this);
+        printerManager.delegate = MainActivity.this;
+        listView = (ListView) findViewById(R.id.listview);
+        listView.setClickable(true);
+         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+             @Override
+             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                 HubtelDeviceInfo o = (HubtelDeviceInfo) listView.getItemAtPosition(i);
 
+                 System.out.println(o.getDeviceManufacturer());
+
+
+                 printerManager.connectToPrinter(o);
+
+             }
+         });
         requestRuntimePermission();
+
+
+        Button button2 = (Button)findViewById(R.id.button2);
+        button2.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                printsomething();
+            }
+        });
 
         Button button = (Button)findViewById(R.id.button);
         button.setOnClickListener(new View.OnClickListener() {
@@ -56,22 +77,11 @@ public class MainActivity extends AppCompatActivity implements PrinterManagerDel
 
 
 
-              printerManager = new PrinterManager(MainActivity.this);
-                printerManager.delegate = MainActivity.this;
+
 
                 printerManager.searchPrinter();
 
 
-              //  searchepsonPrinters();
-
-             /**   if(printerManager.isPortOpened() == true) {
-
-                    printsomething();
-
-                 }else{
-                    printerManager.searchPrinter();
-                }
-**/
 
 
             }
@@ -79,51 +89,6 @@ public class MainActivity extends AppCompatActivity implements PrinterManagerDel
     }
 
 
-
-    private void searchepsonPrinters(){
-
-
-
-       FilterOption mFilterOption = new FilterOption();
-        mFilterOption.setDeviceType(Discovery.TYPE_PRINTER);
-        mFilterOption.setEpsonFilter(Discovery.FILTER_NAME);
-        try {
-            Discovery.start(MainActivity.this, mFilterOption, mDiscoveryListener);
-        }
-        catch (Exception e) {
-
-
-            Log.d("DebugErre",e.toString());
-           // delegate.printerSearchFailed(e.getLocalizedMessage()+"epson");
-
-        }
-    }
-    private DiscoveryListener mDiscoveryListener = new DiscoveryListener() {
-        @Override
-        public void onDiscovery(final DeviceInfo deviceInfo) {
-
-
-            HubtelDeviceInfo hubtelDeviceInfo = new HubtelDeviceInfo();
-
-            hubtelDeviceInfo.setBdAddress(deviceInfo.getBdAddress());
-            hubtelDeviceInfo.setDeviceType(deviceInfo.getDeviceType());
-            hubtelDeviceInfo.setIpAddress(deviceInfo.getIpAddress());
-            hubtelDeviceInfo.setMacAddress(deviceInfo.getMacAddress());
-            hubtelDeviceInfo.setTarget(deviceInfo.getTarget());
-            hubtelDeviceInfo.setBdAddress(deviceInfo.getBdAddress());
-            hubtelDeviceInfo.setDeviceManufacturer("Epson");
-
-
-
-           // hubtelDeviceInfoList.add(hubtelDeviceInfo);
-
-
-
-            //delegate.printerSearchSuccess(hubtelDeviceInfoList);
-
-
-        }
-    };
 
 
 
@@ -180,20 +145,43 @@ public class MainActivity extends AppCompatActivity implements PrinterManagerDel
     }
 
     @Override
-    public void printerSearchSuccess(List<HubtelDeviceInfo> hubtelDeviceInfoList) {
+    public void printerSearchSuccess(final List<HubtelDeviceInfo> hubtelDeviceInfoList) {
 
-        final String  name = ""+hubtelDeviceInfoList.get(0).getDeviceName();
 
-       MainActivity.this.runOnUiThread(new Runnable() {
+        Log.d("Debug","Hubtel pos device list count "+hubtelDeviceInfoList.size());
+        Log.d("Debug ","connecting with this printer "+ hubtelDeviceInfoList.get(0).getDeviceManufacturer());
+
+
+        MainActivity.this.runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                TextView textView = (TextView)findViewById(R.id.textView);
-                textView.setText(name);
+
+
+
+                mAdapter = new DeviceAdapter(MainActivity.this,hubtelDeviceInfoList);
+                listView.setAdapter(mAdapter);
+
             }
         });
 
 
 
+
+
+
+       for (HubtelDeviceInfo j : hubtelDeviceInfoList){
+           Log.d("Debug ","manu " + j.getDeviceManufacturer() + "name "+ j.getDeviceName()+ "name "+ j.getPortName() );
+       }
+
+
+
+    }
+
+    @Override
+    public void printerSearchSuccess(HubtelDeviceInfo hubtelDeviceInfo) {
+
+        //printerManager.connectToPrinter(hubtelDeviceInfo);
+        Log.d("Debug info","Single devive found "+ hubtelDeviceInfo.getPortName());
     }
 
 
@@ -213,17 +201,14 @@ public class MainActivity extends AppCompatActivity implements PrinterManagerDel
     }
 
     @Override
-    public void printerConnectionSuccess(StarIOPort port) {
+    public void printerConnectionSuccess(HubtelDeviceInfo deviceInfo) {
 
-
-        TextView view = (TextView)findViewById(R.id.textView);
-        view.setText(printerManager.getPrinterName());
-
-
-
-        printsomething();
+        TextView view = (TextView) findViewById(R.id.textView);
+        view.setText("Connected to "+deviceInfo.getHumanReadableName() + " Printer");
 
     }
+
+
 
     @Override
     public void printerConnectionFailed(String withError) {
@@ -231,12 +216,12 @@ public class MainActivity extends AppCompatActivity implements PrinterManagerDel
     }
 
     @Override
-    public void printingStatusReport(Communication.Result communicateResult) {
+    public void printingCompletedResult(Communication.Result communicateResult) {
 
 
         if (communicateResult == Communication.Result.Success){
 
-            printerManager.openCashDrawar();
+            printerManager.openCashDrawer();
         }
 
 
@@ -257,6 +242,21 @@ public class MainActivity extends AppCompatActivity implements PrinterManagerDel
 
     @Override
     public void cashDrawertatusReport(Communication.Result communicateResult) {
+
+    }
+
+    @Override
+    public void printingCompletedResult(String communicateResult) {
+
+    }
+
+    @Override
+    public void printingBegan(HubtelDeviceInfo deviceInfo) {
+
+    }
+
+    @Override
+    public void printingFailed(String error) {
 
     }
 
@@ -290,6 +290,8 @@ public class MainActivity extends AppCompatActivity implements PrinterManagerDel
 
 
 
+
+
                  _object.setBusinessName("Hubtel Limited");
                  _object.setBusinessBranch("Main");
                  _object.setBusinessPhone( "0540256631");
@@ -311,7 +313,7 @@ public class MainActivity extends AppCompatActivity implements PrinterManagerDel
         _object.setCustomer("0540256631");
         _object.setDuplicate(false);
 
-      /**   CardDetails cardDetails = new CardDetails();
+       CardDetails cardDetails = new CardDetails();
          cardDetails.setAuthorization("98989");
          cardDetails.setMid("191910022");
          cardDetails.setCard("98911****89");
@@ -321,7 +323,7 @@ public class MainActivity extends AppCompatActivity implements PrinterManagerDel
 
 
          _object.setCardDetails(cardDetails);
-**/
+
 
          Bitmap myLogo = BitmapFactory.decodeResource(MainActivity.this.getResources(), R.drawable.hubtel);
          Bitmap bMapScaled = Bitmap.createScaledBitmap(myLogo, 150, 150, true);
@@ -334,7 +336,9 @@ public class MainActivity extends AppCompatActivity implements PrinterManagerDel
          _object.setLogo(bMapScaled);
           _object.setQrcode(qrcodescaled);
 
-         printerManager.printSomething(_object);
+
+
+        printerManager.printOrderPayment(_object);
      }
 
 

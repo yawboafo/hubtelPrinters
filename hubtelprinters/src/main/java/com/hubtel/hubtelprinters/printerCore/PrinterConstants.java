@@ -1,4 +1,4 @@
-package com.hubtel.hubtelprinters;
+package com.hubtel.hubtelprinters.printerCore;
 
 public class PrinterConstants {
     public static final int LANGUAGE_ENGLISH = 0;

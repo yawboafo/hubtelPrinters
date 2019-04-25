@@ -1,4 +1,4 @@
-package com.hubtel.hubtelprinters;
+package com.hubtel.hubtelprinters.printerCore;
 
 import android.content.Context;
 import android.os.Handler;
@@ -29,23 +29,23 @@ public class Communication {
         ErrorReadPort,
     }
 
-    interface StatusCallback {
+    public  interface StatusCallback {
         void onStatus(StarPrinterStatus result);
     }
 
-    interface FirmwareInformationCallback {
+    public interface FirmwareInformationCallback {
         void onFirmwareInformation(Map<String, String> firmwareInformationMap);
     }
 
-    interface SerialNumberCallback {
+    public interface SerialNumberCallback {
         void onSerialNumber(Communication.Result communicateResult, String serialNumber);
     }
 
-    interface SendCallback {
+   public interface SendCallback {
         void onStatus(boolean result, Communication.Result communicateResult);
     }
 
-    interface PrintRedirectionCallback {
+    public interface PrintRedirectionCallback {
         void onStatus(List<Pair<String, Result>> communicateResultList);
     }
 

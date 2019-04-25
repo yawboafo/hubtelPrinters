@@ -11,7 +11,7 @@ import android.text.Layout;
 import android.text.StaticLayout;
 import android.text.TextPaint;
 
-import com.hubtel.hubtelprinters.PrinterConstants;
+import com.hubtel.hubtelprinters.printerCore.PrinterConstants;
 
 import java.util.List;
 

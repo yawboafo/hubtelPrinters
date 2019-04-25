@@ -1,4 +1,4 @@
-package com.hubtel.hubtelprinters;
+package com.hubtel.hubtelprinters.printerCore;
 
 import android.util.SparseArray;
 import android.util.SparseBooleanArray;

@@ -1,28 +1,41 @@
 <?xml version="1.0" encoding="utf-8"?>
-<TwoLineListItem xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
     android:layout_height="wrap_content"
     android:mode="twoLine"
     android:orientation="horizontal"
-    android:paddingBottom="2dip"
-    android:paddingTop="2dip" >
+    android:padding="5dp"
+    >
 
     <TextView
         android:id="@+id/PrinterName"
         android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:layout_margin="5dp"
-        android:textSize="30sp"
-        android:textColor="#000000" />
+        android:layout_height="30dp"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentLeft="true"
+        android:layout_marginStart="5dp"
+        android:layout_marginLeft="5dp"
+        android:layout_marginTop="5dp"
+        android:layout_marginEnd="5dp"
+        android:layout_marginRight="5dp"
+        android:layout_marginBottom="5dp"
+        android:textColor="#000000"
+        android:textSize="20sp" />
 
     <TextView
         android:id="@+id/Target"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignLeft="@+id/PrinterName"
+        android:layout_width="match_parent"
+        android:layout_height="20dp"
         android:layout_below="@+id/PrinterName"
-        android:layout_margin="5dp"
-        android:textSize="20sp"
-        android:textColor="#000000" />
+        android:layout_alignParentStart="true"
+        android:layout_alignParentLeft="true"
 
-</TwoLineListItem>
+        android:layout_marginStart="10dp"
+        android:layout_marginLeft="10dp"
+        android:layout_marginTop="10dp"
+        android:layout_marginEnd="10dp"
+        android:layout_marginRight="10dp"
+        android:textColor="#000000"
+        android:textSize="10sp" />
+
+</RelativeLayout>

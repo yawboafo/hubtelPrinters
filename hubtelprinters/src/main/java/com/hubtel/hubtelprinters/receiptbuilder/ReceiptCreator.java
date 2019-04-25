@@ -7,8 +7,6 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Typeface;
 
-import com.hubtel.hubtelprinters.CardDetails;
-
 import java.util.ArrayList;
 import java.util.List;
 
