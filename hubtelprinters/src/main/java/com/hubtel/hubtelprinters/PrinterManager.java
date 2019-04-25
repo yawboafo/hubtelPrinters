@@ -346,6 +346,11 @@ public class PrinterManager {
 
     public void searchPrinter(){
 
+
+
+
+        hubtelDeviceInfoList = new ArrayList<>();
+
         if (ContextCompat.checkSelfPermission(activity, Manifest.permission.BLUETOOTH)
                 != PackageManager.PERMISSION_GRANTED) {
             delegate.printerSearchFailed("Bluetooth Permission not granted");
@@ -407,10 +412,11 @@ public class PrinterManager {
                     Printer.PARAM_DEFAULT,
                     Printer.PARAM_DEFAULT,
                     Printer.PARAM_DEFAULT);
+
+
+
+
             mPrinter.addPageEnd();
-
-
-          //  mPrinter.addPageEnd();
             mPrinter.addCut(Printer.CUT_FEED);
         }
         catch (Exception e) {
