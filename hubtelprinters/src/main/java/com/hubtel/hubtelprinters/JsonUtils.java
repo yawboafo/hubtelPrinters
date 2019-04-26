@@ -55,6 +55,8 @@ class JsonUtils {
             hubtelDeviceInfo.setDeviceName(jsonObject.getString("deviceName"));
             hubtelDeviceInfo.setBdAddress(jsonObject.getString("bdAddress"));
 
+
+            hubtelDeviceInfo.setPortName(jsonObject.getString("portName"));
             hubtelDeviceInfo.setIpAddress(jsonObject.getString("ipAddress"));
             hubtelDeviceInfo.setMacAddress(jsonObject.getString("macAddress"));
             hubtelDeviceInfo.setTarget(jsonObject.getString("target"));

@@ -23,10 +23,12 @@ import com.hubtel.hubtelprinters.printerCore.Communication;
 import com.hubtel.hubtelprinters.printerCore.PrinterConstants;
 import com.hubtel.hubtelprinters.printerCore.PrinterModel;
 import com.hubtel.hubtelprinters.printerCore.PrinterModelCapacity;
+import com.hubtel.hubtelprinters.receiptbuilder.CardDetails;
 import com.hubtel.hubtelprinters.receiptbuilder.HubtelDeviceInfo;
 import com.hubtel.hubtelprinters.receiptbuilder.ReceiptCreator;
 import com.hubtel.hubtelprinters.receiptbuilder.LocalisedReceiptBuilder;
 import com.hubtel.hubtelprinters.receiptbuilder.ReceiptObject;
+import com.hubtel.hubtelprinters.receiptbuilder.ReceiptOrderItem;
 import com.starmicronics.stario.PortInfo;
 import com.starmicronics.stario.StarIOPort;
 import com.starmicronics.stario.StarIOPortException;
@@ -102,6 +104,8 @@ public class PrinterManager {
 
            printermodelList = JsonUtils.createPrinterSettingListFromJsonString(prefs.getString(PREF_KEY_PRINTER_SETTINGS_JSON, ""));
 
+
+
         if (printermodelList.size() > 0){
 
             printerModel = getSavedPrinterModel();
@@ -109,13 +113,18 @@ public class PrinterManager {
 
 
 
-          //initEpsonPrinter();
+          initEpsonPrinter();
 
 
 
         try{
             activeHubtelDevice = getActiveHubtelDevice();
-        }catch (Exception e){}
+
+            Log.d("debug",activeHubtelDevice.toString());
+        }catch (Exception e){
+
+
+        }
     }
 
 
@@ -426,10 +435,76 @@ public class PrinterManager {
 
         return true;
     }
+    public void printSample(){
+
+        ReceiptObject _object = new ReceiptObject();
+
+
+        List<ReceiptOrderItem> items = new ArrayList<>();
+        items.add(new ReceiptOrderItem("21","Yam Balls banana ","GHS 12.00"));
+        items.add(new ReceiptOrderItem("3","Yam Balls pizza ","GHS 300.00"));
+        items.add(new ReceiptOrderItem("331","Rabbit ","GHS 300.00"));
+        items.add(new ReceiptOrderItem("21","The men of the league ","GHS 300.00"));
+        items.add(new ReceiptOrderItem("10","Yam Balls ","GHS 300.00"));
+        items.add(new ReceiptOrderItem("1","Yam Balls banana ","GHS 300.00"));
+        items.add(new ReceiptOrderItem("1","Yam Balls pizza ","GHS 300.00"));
+        items.add(new ReceiptOrderItem("1","Rabbit ","GHS 300.00"));
+        items.add(new ReceiptOrderItem("1","The men of the league ","GHS 300.00"));
+        items.add(new ReceiptOrderItem("1","Yam Balls ","GHS 300.00"));
+        items.add(new ReceiptOrderItem("1","Yam Balls banana ","GHS 1,300.00"));
+        items.add(new ReceiptOrderItem("1","Yam Balls pizza ","GHS 1,30,000.00"));
+        items.add(new ReceiptOrderItem("1","Rabbit ","GHS 30,000.00"));
+        items.add(new ReceiptOrderItem("1","The men of the league ","GHS 300.00"));
+        items.add(new ReceiptOrderItem("1","Yam Balls ","GHS 300.00"));
+        items.add(new ReceiptOrderItem("1","Yam Balls banana ","GHS 300.00"));
+        items.add(new ReceiptOrderItem("1","Yam Balls pizza ","GHS 300.00"));
+        items.add(new ReceiptOrderItem("1","Rabbit ","GHS 300.00"));
+        items.add(new ReceiptOrderItem("1","The men of the league ","GHS 300.00"));
+        items.add(new ReceiptOrderItem("1","Yam Balls ","GHS 300.00"));
 
 
 
 
+
+
+        _object.setBusinessName("Hubtel Limited");
+        _object.setBusinessBranch("Main");
+        _object.setBusinessPhone( "0540256631");
+        _object.setBusinessAddress("Kokomlemle/Accra");
+        _object.setBusinessWebUrl( "www.hubtel.com");
+        _object.setPaymentDate("December 5, 2018, 2:20 am");
+        _object.setPaymentReceiptNumber( "099121-1212-9821");
+        _object.setPaymentType("Cash");
+        _object.setItems(items);
+        _object.setSubtotal("GHS 1,090.00");
+        _object.setDiscount("GHS 0.00");
+        _object.setTax("GHS 0.00");
+        _object.setGratisPoint("0.0 pts");
+        _object.setAmountPaid("GHS 1,000.00");
+        _object.setSubtotal("GHS 1,090.00");
+        _object.setChange("GHS 90.00");
+        _object.setTotal("GHS 1,090.00");
+        _object.setEmployeeName("Apostle Boafo");
+        _object.setCustomer("0540256631");
+        _object.setDuplicate(false);
+
+        CardDetails cardDetails = new CardDetails();
+        cardDetails.setAuthorization("98989");
+        cardDetails.setMid("191910022");
+        cardDetails.setCard("98911****89");
+        cardDetails.setSchema("Visa");
+        cardDetails.setTransID("32HDD333D999D");
+        cardDetails.setTid("ZHUB232");
+
+
+        _object.setCardDetails(cardDetails);
+
+
+
+
+printOrderPayment(_object);
+
+    }
 
     private boolean createReceiptData(ReceiptObject object) {
 
@@ -930,17 +1005,17 @@ public class PrinterManager {
             .apply();
       }
 
-    private HubtelDeviceInfo getActiveHubtelDevice(){
+    public HubtelDeviceInfo getActiveHubtelDevice(){
 
 
-
+Log.d("Debug",JsonUtils.createJsonStringOfActiveHubtelDevices(prefs.getString(PREF_KEY_ACTIVE_HUBTEL_DEVICE, "")).toString());
 
         return JsonUtils.createJsonStringOfActiveHubtelDevices(prefs.getString(PREF_KEY_ACTIVE_HUBTEL_DEVICE, ""));
 
     }
 
 
-    private PrinterModel getSavedPrinterModel() {
+    public PrinterModel getSavedPrinterModel() {
         if (printermodelList.isEmpty()) {
             return null;
         }

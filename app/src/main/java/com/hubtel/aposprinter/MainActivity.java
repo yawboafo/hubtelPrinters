@@ -64,6 +64,11 @@ public class MainActivity extends AppCompatActivity implements PrinterManagerDel
         button2.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+
+
+
+
+
                 printsomething();
             }
         });
@@ -86,11 +91,13 @@ public class MainActivity extends AppCompatActivity implements PrinterManagerDel
 
             }
         });
+
+
+        if (printerManager.getActiveHubtelDevice() != null ){
+            TextView view = (TextView) findViewById(R.id.textView);
+            view.setText("Connected to "+printerManager.getActiveHubtelDevice().getHumanReadableName() + " Printer");
+        }
     }
-
-
-
-
 
 
     private void requestRuntimePermission() {
