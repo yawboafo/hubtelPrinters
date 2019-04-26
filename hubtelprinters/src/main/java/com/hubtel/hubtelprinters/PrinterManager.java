@@ -120,7 +120,6 @@ public class PrinterManager {
         try{
             activeHubtelDevice = getActiveHubtelDevice();
 
-            Log.d("debug",activeHubtelDevice.toString());
         }catch (Exception e){
 
 
