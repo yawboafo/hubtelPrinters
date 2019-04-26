@@ -173,6 +173,10 @@ public class LocalisedReceiptBuilder {
 
     private Bitmap givemeListString(List<ReceiptOrderItem> items){
 
+
+        if (items == null || items.size() == 0)
+            return null;
+
         String itemizedList = "";
         for (ReceiptOrderItem item : items) {
             String itemName = "";

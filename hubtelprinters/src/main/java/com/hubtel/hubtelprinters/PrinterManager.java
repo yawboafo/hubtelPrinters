@@ -80,6 +80,9 @@ public class PrinterManager {
 
     private static StarIOPort port = null;
 
+
+    public  PrinterManager(){}
+
     public PrinterManager(Activity activity){
 
 
@@ -105,7 +108,9 @@ public class PrinterManager {
         }
 
 
-        initEpsonPrinter();
+
+          //initEpsonPrinter();
+
 
 
         try{
@@ -119,18 +124,176 @@ public class PrinterManager {
 
         try {
             mPrinter = new Printer(0, 0, activity);
+
+            mPrinter.setReceiveEventListener(epSonreceiveListener);
+            mPrinter.setConnectionEventListener(epSonconnectionListener);
+
+
         } catch (Exception e) {
 
         }
 
 
-        mPrinter.setReceiveEventListener(epSonreceiveListener);
-        mPrinter.setConnectionEventListener(epSonconnectionListener);
 
         return mPrinter;
 
     }
 
+
+
+
+    private boolean connectPrinter(HubtelDeviceInfo deviceInfo) {
+        boolean isBeginTransaction = false;
+
+        if (mPrinter == null) {
+            return false;
+        }
+
+        try {
+            Log.d("Debug",deviceInfo.getTarget());
+            mPrinter.connect(deviceInfo.getTarget(), Printer.PARAM_DEFAULT);
+        }
+        catch (Exception e) {
+
+            return false;
+        }
+
+        try {
+            mPrinter.beginTransaction();
+            isBeginTransaction = true;
+        }
+        catch (Exception e) {
+
+        }
+
+        if (isBeginTransaction == false) {
+            try {
+                mPrinter.disconnect();
+            }
+            catch (Epos2Exception e) {
+                // Do nothing
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+
+
+
+    public void unRegisterReceiver(){
+        mPrinter.setReceiveEventListener(null);
+        mPrinter.setConnectionEventListener(null);
+        mPrinter.setStatusChangeEventListener(null);
+
+        try {
+
+
+            Discovery.stop();
+            mPrinter.disconnect();
+        }
+        catch (Epos2Exception e) {
+
+        }
+
+
+    }
+
+
+
+
+
+    private void disconnectPrinter() {
+        if (mPrinter == null) {
+            return;
+        }
+
+        try {
+            mPrinter.endTransaction();
+        }
+        catch (final Exception e) {
+          delegate.printerConnectionFailed("Failed to disconnect Printer");
+        }
+
+        try {
+            mPrinter.disconnect();
+        }
+        catch (final Exception e) {
+            delegate.printerConnectionFailed("Failed to disconnect Printer");
+        }
+
+        finalizeObject();
+    }
+
+    public void finalizeObject() {
+        if (mPrinter == null) {
+            return;
+        }
+
+        mPrinter.clearCommandBuffer();
+
+        mPrinter.setReceiveEventListener(null);
+        mPrinter.setConnectionEventListener(null);
+        mPrinter.setStatusChangeEventListener(null);
+
+        mPrinter = null;
+    }
+
+    public StarIOPort getPort() {
+
+         return  port;
+     }
+
+     public boolean isPortOpened(){
+
+         if(port == null)
+             return  false;
+         else
+             return true;
+
+     }
+
+    public  String getPrinterName(){
+
+
+         return
+                 this.mPortName.substring(PrinterConstants.IF_TYPE_BLUETOOTH.length());
+    }
+
+    public  void connectToPrinter(final  HubtelDeviceInfo portInfo){
+
+                setActiveHubtelDevice(portInfo);
+
+                switch (getActiveHubtelDevice().getDeviceManufacturer()){
+
+
+                    case "Epson":
+
+                        Runnable task = new Runnable() {
+                            @Override
+                            public void run() {
+                                connectEpsonPrinterRaw(portInfo);
+                            }
+                        };
+                        task.run();
+
+
+                        break;
+                    case "Star":
+                        connectToStarPrinter(portInfo);
+                        break;
+                }
+
+
+
+
+        //activeHubtelDevice = portInfo;
+
+
+
+
+    }
 
 
     private boolean connectEpsonPrinterRaw(HubtelDeviceInfo deviceInfo) {
@@ -177,128 +340,6 @@ public class PrinterManager {
 
         return true;
     }
-
-    private boolean connectPrinter(HubtelDeviceInfo deviceInfo) {
-        boolean isBeginTransaction = false;
-
-        if (mPrinter == null) {
-            return false;
-        }
-
-        try {
-            Log.d("Debug",deviceInfo.getTarget());
-            mPrinter.connect(deviceInfo.getTarget(), Printer.PARAM_DEFAULT);
-        }
-        catch (Exception e) {
-
-            return false;
-        }
-
-        try {
-            mPrinter.beginTransaction();
-            isBeginTransaction = true;
-        }
-        catch (Exception e) {
-
-        }
-
-        if (isBeginTransaction == false) {
-            try {
-                mPrinter.disconnect();
-            }
-            catch (Epos2Exception e) {
-                // Do nothing
-                return false;
-            }
-        }
-
-        return true;
-    }
-
-
-
-    private void disconnectPrinter() {
-        if (mPrinter == null) {
-            return;
-        }
-
-        try {
-            mPrinter.endTransaction();
-        }
-        catch (final Exception e) {
-          delegate.printerConnectionFailed("Failed to disconnect Printer");
-        }
-
-        try {
-            mPrinter.disconnect();
-        }
-        catch (final Exception e) {
-            delegate.printerConnectionFailed("Failed to disconnect Printer");
-        }
-
-        finalizeObject();
-    }
-
-    private void finalizeObject() {
-        if (mPrinter == null) {
-            return;
-        }
-
-        mPrinter.clearCommandBuffer();
-
-        mPrinter.setReceiveEventListener(null);
-
-        mPrinter = null;
-    }
-
-    public StarIOPort getPort() {
-
-         return  port;
-     }
-
-     public boolean isPortOpened(){
-
-         if(port == null)
-             return  false;
-         else
-             return true;
-
-     }
-
-    public  String getPrinterName(){
-
-
-         return
-                 this.mPortName.substring(PrinterConstants.IF_TYPE_BLUETOOTH.length());
-    }
-
-    public  void connectToPrinter(final  HubtelDeviceInfo portInfo){
-
-                setActiveHubtelDevice(portInfo);
-
-                switch (getActiveHubtelDevice().getDeviceManufacturer()){
-
-
-                    case "Epson":
-
-                        connectEpsonPrinterRaw(portInfo);
-                        break;
-                    case "Star":
-                        connectToStarPrinter(portInfo);
-                        break;
-                }
-
-
-
-
-        //activeHubtelDevice = portInfo;
-
-
-
-
-    }
-
-
 
     private void connectToStarPrinter(HubtelDeviceInfo portInfo){
 
@@ -388,6 +429,56 @@ public class PrinterManager {
 
 
 
+
+
+    private boolean createReceiptData(ReceiptObject object) {
+
+
+        final int pageAreaHeight = 500;
+        final int pageAreaWidth = 500;
+
+        if (mPrinter == null) {
+            return false;
+        }
+
+        try {
+
+
+/*
+
+            mPrinter.addPageBegin();
+            mPrinter.addPageArea(0, 0, bitmap.getWidth(), bitmap.getHeight() + 50);
+            mPrinter.addPagePosition(0, bitmap.getHeight());
+
+
+
+
+            mPrinter.addImage(
+                    bitmap, 0, 0,
+                    bitmap.getWidth(),
+                    bitmap.getHeight(),
+                    Printer.PARAM_DEFAULT,
+                    Printer.PARAM_DEFAULT,
+                    Printer.PARAM_DEFAULT,
+                    Printer.PARAM_DEFAULT,
+                    Printer.PARAM_DEFAULT);
+
+*/
+
+            mPrinter.addPageEnd();
+
+            mPrinter.addCut(Printer.CUT_FEED);
+        }
+        catch (Exception e) {
+
+            delegate.printingFailed(e.getLocalizedMessage());
+            return false;
+        }
+
+
+
+        return true;
+    }
     private boolean createReceiptData(Bitmap bitmap) {
 
 
@@ -403,7 +494,10 @@ public class PrinterManager {
             mPrinter.addPageArea(0, 0, bitmap.getWidth(), bitmap.getHeight() + 50);
             mPrinter.addPagePosition(0, bitmap.getHeight());
 
-            mPrinter.addImage(
+
+
+
+         mPrinter.addImage(
                     bitmap, 0, 0,
                     bitmap.getWidth(),
                     bitmap.getHeight(),
@@ -414,9 +508,8 @@ public class PrinterManager {
                     Printer.PARAM_DEFAULT);
 
 
-
-
             mPrinter.addPageEnd();
+
             mPrinter.addCut(Printer.CUT_FEED);
         }
         catch (Exception e) {
@@ -643,12 +736,15 @@ public class PrinterManager {
                     case "Epson":
 
 
-                        LocalisedReceiptBuilder localisedReceiptBuilder1 = new LocalisedReceiptBuilder(activity);
-                        Bitmap _data = localisedReceiptBuilder1.orderPaymentReceipt(object);
-                        createReceiptData(_data);
+                        //LocalisedReceiptBuilder localisedReceiptBuilder1 = new LocalisedReceiptBuilder(activity);
+                        //Bitmap _data = localisedReceiptBuilder1.orderPaymentReceipt(object);
+                      //  createReceiptData(_data);
 
 
                         printData(getActiveHubtelDevice());
+
+
+                       delegate.printingCompletedResult("Epson receipt not supported for now ");
 
                         break;
                     case "Star":
@@ -939,10 +1035,7 @@ public class PrinterManager {
         @Override
         public void onPtrReceive(Printer printer, int i, PrinterStatusInfo printerStatusInfo, String s) {
 
-
             delegate.printingCompletedResult("Epson Print Success");
-
-
             new Thread(new Runnable() {
                 @Override
                 public void run() {

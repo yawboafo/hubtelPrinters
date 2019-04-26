@@ -108,7 +108,16 @@ public class ReceiptCreator {
 
     public ReceiptCreator addText(String text) {
 
-        if ( text == null ||  text.isEmpty() || text.contains("null")){
+
+        if ( text == null ) {
+            return  this;
+        }
+
+        if ( text.isEmpty() ) {
+            return  this;
+        }
+
+        if ( text.contains("null")) {
             return  this;
         }
 
@@ -120,7 +129,16 @@ public class ReceiptCreator {
 
     public ReceiptCreator addText(String text, Boolean newLine) {
 
-        if ( text == null ||  text.isEmpty() || text.contains("null")){
+
+        if ( text == null ) {
+            return  this;
+        }
+
+        if ( text.isEmpty() ) {
+            return  this;
+        }
+
+        if ( text.contains("null")) {
             return  this;
         }
 
@@ -144,7 +162,16 @@ public class ReceiptCreator {
 
     public ReceiptCreator addTextLeft(String text) {
 
-        if ( text == null ||  text.isEmpty() || text.contains("null")){
+
+        if ( text == null ) {
+            return  this;
+        }
+
+        if ( text.isEmpty() ) {
+            return  this;
+        }
+
+        if ( text.contains("null")) {
             return  this;
         }
 
@@ -166,7 +193,16 @@ public class ReceiptCreator {
 
     public ReceiptCreator addTextLeft(String text,Boolean newline) {
 
-        if ( text == null ||  text.isEmpty() || text.contains("null")){
+
+        if ( text == null ) {
+            return  this;
+        }
+
+        if ( text.isEmpty() ) {
+            return  this;
+        }
+
+        if ( text.contains("null")) {
             return  this;
         }
 
@@ -188,7 +224,16 @@ public class ReceiptCreator {
 
     public ReceiptCreator addTextRight(String text) {
 
-        if ( text == null ||  text.isEmpty() || text.contains("null")){
+
+        if ( text == null ) {
+            return  this;
+        }
+
+        if ( text.isEmpty() ) {
+            return  this;
+        }
+
+        if ( text.contains("null")) {
             return  this;
         }
 
@@ -210,7 +255,15 @@ public class ReceiptCreator {
     public ReceiptCreator addTextRight(String text, Boolean newline) {
 
 
-        if ( text == null ||  text.isEmpty() || text.contains("null")){
+        if ( text == null ) {
+            return  this;
+        }
+
+        if ( text.isEmpty() ) {
+            return  this;
+        }
+
+        if ( text.contains("null")) {
             return  this;
         }
 
@@ -231,10 +284,20 @@ public class ReceiptCreator {
 
     public ReceiptCreator addTextRightAndLeft(String LString,String RString){
 
-        if ( LString.contains("null") ||  LString == null ||  RString.isEmpty()   || RString == null ||  RString.isEmpty()  || RString.contains("null")){
+        if ( LString == null  ||  RString == null ){
             return  this;
         }
 
+
+        if ( LString.isEmpty()  ||  RString.isEmpty() ){
+            return  this;
+        }
+
+
+
+        if ( LString.contains("null")  ||  RString.contains("null") ){
+            return  this;
+        }
 
         CreateText drawerTextR = new CreateText(RString);
         drawerTextR.setTextSize(this.textSize);
@@ -278,10 +341,20 @@ public class ReceiptCreator {
 
 
 
-        if ( cardDetails == null ||  cardDetails.getCard() == null || cardDetails.getCard().isEmpty()){
+
+
+
+        if ( cardDetails == null ) {
             return  this;
         }
 
+        if ( cardDetails.getCard().isEmpty() ) {
+            return  this;
+        }
+
+        if ( cardDetails.getCard().contains("null")) {
+            return  this;
+        }
 
         listItens.add(new CreateBlankSpace((int) textSize));
 
@@ -384,9 +457,18 @@ public class ReceiptCreator {
 
     public ReceiptCreator addTextCenter(String text) {
 
-        if ( text == null ||  text.isEmpty() || text.contains("null")){
+        if ( text == null ) {
             return  this;
         }
+
+        if ( text.isEmpty() ) {
+            return  this;
+        }
+
+        if ( text.contains("null")) {
+            return  this;
+        }
+
 
         CreateText drawerText = new CreateText(text);
         drawerText.setTextSize(this.textSize);
@@ -407,7 +489,15 @@ public class ReceiptCreator {
 
     public ReceiptCreator addTextDuplicate(String text) {
 
-        if ( text == null ||  text.isEmpty() || text.contains("null")){
+        if ( text == null ) {
+            return  this;
+        }
+
+        if ( text.isEmpty() ) {
+            return  this;
+        }
+
+        if ( text.contains("null")) {
             return  this;
         }
 

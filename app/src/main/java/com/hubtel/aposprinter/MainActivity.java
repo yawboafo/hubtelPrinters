@@ -45,7 +45,7 @@ public class MainActivity extends AppCompatActivity implements PrinterManagerDel
         printerManager.delegate = MainActivity.this;
         listView = (ListView) findViewById(R.id.listview);
         listView.setClickable(true);
-         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
              @Override
              public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
                  HubtelDeviceInfo o = (HubtelDeviceInfo) listView.getItemAtPosition(i);
@@ -139,6 +139,16 @@ public class MainActivity extends AppCompatActivity implements PrinterManagerDel
             ActivityCompat.requestPermissions(this, requestPermissions.toArray(new String[requestPermissions.size()]), REQUEST_PERMISSION);
         }
     }
+
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        printerManager.unRegisterReceiver();
+
+
+    }
+
     @Override
     public void printerSearchBegan() {
 
