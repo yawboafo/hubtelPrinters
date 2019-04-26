@@ -95,7 +95,9 @@ public class MainActivity extends AppCompatActivity implements PrinterManagerDel
 
         if (printerManager.getActiveHubtelDevice() != null ){
             TextView view = (TextView) findViewById(R.id.textView);
-            view.setText("Connected to "+printerManager.getActiveHubtelDevice().getHumanReadableName() + " Printer");
+
+          //  if (printerManager.getActiveHubtelDevice() != null)
+           // view.setText("Connected to "+printerManager.getActiveHubtelDevice().getHumanReadableName() + " Printer");
         }
     }
 
@@ -152,7 +154,7 @@ public class MainActivity extends AppCompatActivity implements PrinterManagerDel
     protected void onPause() {
         super.onPause();
         printerManager.unRegisterReceiver();
-
+        printerManager.delegate = null;
 
     }
 
@@ -196,6 +198,23 @@ public class MainActivity extends AppCompatActivity implements PrinterManagerDel
 
     @Override
     public void printerSearchSuccess(HubtelDeviceInfo hubtelDeviceInfo) {
+        final List<HubtelDeviceInfo> list = new ArrayList<>();
+        list.add(hubtelDeviceInfo);
+
+
+        MainActivity.this.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+
+
+
+
+
+                mAdapter = new DeviceAdapter(MainActivity.this,list);
+                listView.setAdapter(mAdapter);
+
+            }
+        });
 
         //printerManager.connectToPrinter(hubtelDeviceInfo);
         Log.d("Debug info","Single devive found "+ hubtelDeviceInfo.getPortName());

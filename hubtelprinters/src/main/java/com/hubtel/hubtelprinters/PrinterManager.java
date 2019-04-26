@@ -113,7 +113,7 @@ public class PrinterManager {
 
 
 
-          initEpsonPrinter();
+       //   initEpsonPrinter();
 
 
 
@@ -191,12 +191,15 @@ public class PrinterManager {
 
 
     public void unRegisterReceiver(){
-        mPrinter.setReceiveEventListener(null);
-        mPrinter.setConnectionEventListener(null);
-        mPrinter.setStatusChangeEventListener(null);
+
 
         try {
 
+
+
+            mPrinter.setReceiveEventListener(null);
+            mPrinter.setConnectionEventListener(null);
+            mPrinter.setStatusChangeEventListener(null);
 
             Discovery.stop();
             mPrinter.disconnect();
@@ -798,13 +801,10 @@ printOrderPayment(_object);
     public  void printOrderPayment(final ReceiptObject object){
 
 
-
-
-
         new Thread(new Runnable() {
             @Override
             public void run() {
-                switch (getActiveHubtelDevice().getDeviceManufacturer()){
+                switch (printerModel.getmManufacturer()){
 
 
                     case "Epson":
