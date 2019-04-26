@@ -1,5 +1,5 @@
 apply plugin: 'com.android.library'
-group='com.github.yawboafo'
+group ='com.github.yawboafo'
 
 android {
     compileSdkVersion 28
@@ -26,9 +26,7 @@ android {
 
 }
 
-configurations {
-    myConfig
-}
+
 dependencies {
     implementation fileTree(include: ['*.jar','.so'], dir: 'libs')
     testImplementation 'junit:junit:4.12'
@@ -39,16 +37,12 @@ dependencies {
     implementation project(path: ':starioextension')
     implementation 'com.android.support:support-compat:28.0.0'
     implementation project(path: ':ePOS2')
+    implementation 'com.github.yawboafo:hubtelPrinters:1.1'
 
-    myConfig fileTree(include: ['*.jar','.so'], dir: 'libs')
 
 
 }
-task copyLibs(type: Copy) {
-    // Now you can use 'myConfig' instead of 'implementation' or 'compile'
-    from configurations.myConfig
-    into "$project.rootDir/libs/"
-}
+
 
 
 

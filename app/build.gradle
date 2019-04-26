@@ -29,4 +29,5 @@ dependencies {
     implementation project(path: ':starioextension')
     implementation project(path: ':ePOS2')
     implementation project(path: ':hubtelprinters')
+
 }
