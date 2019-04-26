@@ -348,6 +348,11 @@ public class ReceiptCreator {
             return  this;
         }
 
+
+        if ( cardDetails.getCard() == null ) {
+            return  this;
+        }
+
         if ( cardDetails.getCard().isEmpty() ) {
             return  this;
         }

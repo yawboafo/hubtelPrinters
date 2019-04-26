@@ -804,7 +804,7 @@ printOrderPayment(_object);
         new Thread(new Runnable() {
             @Override
             public void run() {
-                switch (printerModel.getmManufacturer()){
+                switch (getActiveHubtelDevice().getDeviceManufacturer()){
 
 
                     case "Epson":
