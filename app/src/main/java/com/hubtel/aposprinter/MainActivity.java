@@ -18,11 +18,12 @@ import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.hubtel.hubtelprinters.Delegates.PrinterConnectionDelegate;
 import com.hubtel.hubtelprinters.receiptbuilder.CardDetails;
 import com.hubtel.hubtelprinters.printerCore.Communication;
 import com.hubtel.hubtelprinters.receiptbuilder.HubtelDeviceInfo;
 import com.hubtel.hubtelprinters.PrinterManager;
-import com.hubtel.hubtelprinters.PrinterManagerDelegate;
+import com.hubtel.hubtelprinters.Delegates.PrinterManagerDelegate;
 
 import com.hubtel.hubtelprinters.receiptbuilder.ReceiptObject;
 import com.hubtel.hubtelprinters.receiptbuilder.ReceiptOrderItem;
@@ -30,11 +31,13 @@ import com.hubtel.hubtelprinters.receiptbuilder.ReceiptOrderItem;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MainActivity extends AppCompatActivity implements PrinterManagerDelegate {
+public class MainActivity extends AppCompatActivity implements PrinterManagerDelegate, PrinterConnectionDelegate {
     PrinterManager printerManager;
     private static final int REQUEST_PERMISSION = 100;
     private ListView listView;
     private DeviceAdapter mAdapter;
+
+    private  HubtelDeviceInfo _deviceInfo;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,6 +46,7 @@ public class MainActivity extends AppCompatActivity implements PrinterManagerDel
 
         printerManager = new PrinterManager(MainActivity.this);
         printerManager.delegate = MainActivity.this;
+        printerManager.connectionDelegate = MainActivity.this;
         listView = (ListView) findViewById(R.id.listview);
         listView.setClickable(true);
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -237,7 +241,22 @@ public class MainActivity extends AppCompatActivity implements PrinterManagerDel
     }
 
     @Override
+    public void printerConnectionBegan(HubtelDeviceInfo deviceInfo) {
+        TextView view = (TextView) findViewById(R.id.textView);
+        view.setText("Connecting to "+deviceInfo.getHumanReadableName() + " ...");
+    }
+
+    @Override
+    public void printerConnectionFailed(HubtelDeviceInfo deviceInfo, String error) {
+        TextView view = (TextView) findViewById(R.id.textView);
+        view.setText("Connecting to "+deviceInfo.getHumanReadableName() + "faled  :"+error);
+    }
+
+    @Override
     public void printerConnectionSuccess(HubtelDeviceInfo deviceInfo) {
+
+
+        _deviceInfo = deviceInfo;
 
         TextView view = (TextView) findViewById(R.id.textView);
         view.setText("Connected to "+deviceInfo.getHumanReadableName() + " Printer");
@@ -374,7 +393,7 @@ public class MainActivity extends AppCompatActivity implements PrinterManagerDel
 
 
 
-        printerManager.printOrderPayment(_object);
+        printerManager.printOrderPayment(_deviceInfo,_object);
      }
 
 

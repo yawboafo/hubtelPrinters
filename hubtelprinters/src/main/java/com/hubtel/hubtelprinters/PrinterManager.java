@@ -19,7 +19,10 @@ import com.epson.epos2.Epos2Exception;
 import com.epson.epos2.printer.Printer;
 import com.epson.epos2.printer.PrinterStatusInfo;
 import com.epson.epos2.printer.ReceiveListener;
+import com.hubtel.hubtelprinters.Delegates.PrinterConnectionDelegate;
+import com.hubtel.hubtelprinters.Delegates.PrinterManagerDelegate;
 import com.hubtel.hubtelprinters.printerCore.Communication;
+import com.hubtel.hubtelprinters.printerCore.PrinterConnections;
 import com.hubtel.hubtelprinters.printerCore.PrinterConstants;
 import com.hubtel.hubtelprinters.printerCore.PrinterModel;
 import com.hubtel.hubtelprinters.printerCore.PrinterModelCapacity;
@@ -56,14 +59,7 @@ public class PrinterManager {
     private FilterOption mFilterOption = null;
 
 
-    private int       mModelIndex;
-    private String    mPortName;
-    private String    mPortSettings;
-    private String    mMacAddress;
-    private String    mModelName;
-    private String mManufacturer;
-    private Boolean   mDrawerOpenStatus;
-    private int       mPaperSize;
+
     private Activity activity;
     private List<PortInfo> portList;
     private  List<HubtelDeviceInfo> hubtelDeviceInfoList;
@@ -72,22 +68,28 @@ public class PrinterManager {
     private Printer mPrinter = null;
     private PrinterModel printerModel;
     SharedPreferences prefs;
+    PrinterUtilities printerUtilities;
 
 
 
-    private int       mPrinterSettingIndex = 0;
 
-    private boolean            mTryConnect = false;
+    private boolean  mTryConnect = false;
 
 
     private static StarIOPort port = null;
+
+
+
+
+    public PrinterConnectionDelegate connectionDelegate=null;
+
 
 
     public  PrinterManager(){}
 
     public PrinterManager(Activity activity){
 
-
+        printerUtilities = new PrinterUtilities();
 
         portList = Collections.emptyList();
         hubtelDeviceInfoList = new ArrayList<>();
@@ -102,13 +104,13 @@ public class PrinterManager {
                      .apply();
          }
 
-           printermodelList = JsonUtils.createPrinterSettingListFromJsonString(prefs.getString(PREF_KEY_PRINTER_SETTINGS_JSON, ""));
+           printermodelList = printerUtilities.getPrinterModelList(prefs);
 
 
 
         if (printermodelList.size() > 0){
 
-            printerModel = getSavedPrinterModel();
+            printerModel = printerUtilities.getSavedPrinterModel(prefs);
         }
 
 
@@ -118,7 +120,7 @@ public class PrinterManager {
 
 
         try{
-            activeHubtelDevice = getActiveHubtelDevice();
+            activeHubtelDevice = printerUtilities.getActiveHubtelDevice(prefs);
 
         }catch (Exception e){
 
@@ -126,6 +128,12 @@ public class PrinterManager {
         }
     }
 
+
+
+    public HubtelDeviceInfo getActiveHubtelDevice() {
+
+        return printerUtilities.getActiveHubtelDevice(prefs);
+    }
 
 
     private Printer initEpsonPrinter() {
@@ -251,32 +259,13 @@ public class PrinterManager {
         mPrinter = null;
     }
 
-    public StarIOPort getPort() {
 
-         return  port;
-     }
-
-     public boolean isPortOpened(){
-
-         if(port == null)
-             return  false;
-         else
-             return true;
-
-     }
-
-    public  String getPrinterName(){
-
-
-         return
-                 this.mPortName.substring(PrinterConstants.IF_TYPE_BLUETOOTH.length());
-    }
 
     public  void connectToPrinter(final  HubtelDeviceInfo portInfo){
 
-                setActiveHubtelDevice(portInfo);
+        printerUtilities.setActiveHubtelDevice(prefs,portInfo);
 
-                switch (getActiveHubtelDevice().getDeviceManufacturer()){
+                switch (portInfo.getDeviceManufacturer()){
 
 
                     case "Epson":
@@ -284,7 +273,9 @@ public class PrinterManager {
                         Runnable task = new Runnable() {
                             @Override
                             public void run() {
-                                connectEpsonPrinterRaw(portInfo);
+
+                                PrinterConnections connections = new PrinterConnections();
+                                connections.connectEpsonPrinterRaw(mPrinter,portInfo,connectionDelegate,epSonconnectionListener);
                             }
                         };
                         task.run();
@@ -292,7 +283,9 @@ public class PrinterManager {
 
                         break;
                     case "Star":
-                        connectToStarPrinter(portInfo);
+
+                          PrinterConnections connections = new PrinterConnections();
+                          connections.connectToStarPrinter(portInfo,connectionDelegate,prefs);
                         break;
                 }
 
@@ -307,94 +300,10 @@ public class PrinterManager {
     }
 
 
-    private boolean connectEpsonPrinterRaw(HubtelDeviceInfo deviceInfo) {
-        boolean isBeginTransaction = false;
-        delegate.printerConnectionBegan();
-        if (mPrinter == null) {
-            return false;
-        }
-
-        try {
-
-            mPrinter.setConnectionEventListener(epSonconnectionListener);
-            mPrinter.connect((deviceInfo.getTarget()), Printer.PARAM_DEFAULT);
-
-            delegate.printerConnectionSuccess(deviceInfo);
-        }
-        catch (Exception e) {
-
-
-            delegate.printerConnectionFailed(e.getLocalizedMessage() + "Epson connection error");
-
-            return false;
-        }
-
-        try {
-            mPrinter.beginTransaction();
-            isBeginTransaction = true;
-        }
-        catch (Exception e) {
-
-            delegate.printerConnectionFailed(e.getLocalizedMessage() + "Epson beginTransaction error");
-
-        }
-
-        if (isBeginTransaction == false) {
-            try {
-                mPrinter.disconnect();
-            }
-            catch (Epos2Exception e) {
-                // Do nothing
-                return false;
-            }
-        }
-
-        return true;
+    public int getAllReceiptSetting() {
+        return mAllReceiptSettings;
     }
 
-    private void connectToStarPrinter(HubtelDeviceInfo portInfo){
-
-
-        delegate.printerConnectionBegan();
-        this.mManufacturer = portInfo.getDeviceManufacturer();
-        this.mPortName = portInfo.getPortName();
-        this.mModelName = portInfo.getPortName().substring(PrinterConstants.IF_TYPE_BLUETOOTH.length());
-        this.mModelIndex = PrinterModelCapacity.getModel( this.mModelName);
-        this.mPortSettings = PrinterModelCapacity.getPortSettings(mModelIndex);
-        this.mDrawerOpenStatus = true ;
-        if(portInfo.getMacAddress().startsWith("(") && portInfo.getMacAddress().endsWith(")"))
-            this.mMacAddress = portInfo.getMacAddress().substring(1, portInfo.getMacAddress().length() - 1);
-        else
-            this.mMacAddress = portInfo.getMacAddress();
-
-
-
-
-        printerModel = new PrinterModel(this.mModelIndex,
-                this.mManufacturer,
-                this.mPortName,
-                this.mPortSettings,
-                this.mMacAddress,
-                this.mModelName,
-                true,
-                PrinterConstants.PAPER_SIZE_FOUR_INCH);
-
-
-        saveActivePrinterModel(
-                mPrinterSettingIndex,
-                printerModel
-        );
-
-
-
-        printerModel = getSavedPrinterModel();
-
-
-        if (port == null)
-            rawConnectToStarPrinters(portInfo);
-        else
-            delegate.printerConnectionSuccess(portInfo);
-    }
 
     public void searchPrinter(){
 
@@ -675,14 +584,14 @@ printOrderPayment(_object);
     public void openCashDrawer(){
 
             ICommandBuilder.PeripheralChannel channel = ICommandBuilder.PeripheralChannel.No1;
-            StarIoExt.Emulation emulation = PrinterModelCapacity.getEmulation(getSavedPrinterModel().getModelIndex());
+            StarIoExt.Emulation emulation = PrinterModelCapacity.getEmulation(printerUtilities.getSavedPrinterModel(prefs).getModelIndex());
 
 
             byte[] data = openCashDrawerCommand(emulation, channel);
 
 
 
-            Communication.sendCommands(this, data, getSavedPrinterModel().getPortName(), getSavedPrinterModel().getPortSettings(), 10000, activity, new Communication.SendCallback() {
+            Communication.sendCommands(this, data, printerUtilities.getSavedPrinterModel(prefs).getPortName(), printerUtilities.getSavedPrinterModel(prefs).getPortSettings(), 10000, activity, new Communication.SendCallback() {
                  @Override
                  public void onStatus(boolean result, Communication.Result communicateResult) {
 
@@ -790,12 +699,54 @@ printOrderPayment(_object);
     public void printMainJob(Bitmap data){
 
 
-        ICommandBuilder builder = StarIoExt.createCommandBuilder(PrinterModelCapacity.getEmulation(getSavedPrinterModel().getModelIndex()));
+        ICommandBuilder builder = StarIoExt.createCommandBuilder(PrinterModelCapacity.getEmulation(printerUtilities.getSavedPrinterModel(prefs).getModelIndex()));
         builder.beginDocument();
         builder.appendBitmap(data, true);
         builder.appendCutPaper(ICommandBuilder.CutPaperAction.PartialCutWithFeed);
         builder.endDocument();
-        Communication.sendCommands(this, builder.getCommands(), getSavedPrinterModel().getPortName(), getSavedPrinterModel().getPortSettings(), 10000, activity, mCallback);
+        Communication.sendCommands(this, builder.getCommands(), printerUtilities.getSavedPrinterModel(prefs).getPortName(), printerUtilities.getSavedPrinterModel(prefs).getPortSettings(), 10000, activity, mCallback);
+    }
+
+
+    public  void printOrderPayment(final HubtelDeviceInfo deviceInfo,final ReceiptObject object){
+
+
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                switch (deviceInfo.getDeviceManufacturer()){
+
+
+                    case "Epson":
+
+
+                        LocalisedReceiptBuilder localisedReceiptBuilder1 = new LocalisedReceiptBuilder(activity);
+                        Bitmap _data = localisedReceiptBuilder1.orderPaymentReceipt(object);
+                        createReceiptData(_data);
+
+
+                        initEpsonPrinter();
+
+                        printData(deviceInfo);
+
+
+                        //delegate.printingCompletedResult("Epson receipt not supported for now ");
+
+                        break;
+                    case "Star":
+                        LocalisedReceiptBuilder localisedReceiptBuilder = new LocalisedReceiptBuilder(activity);
+                        Bitmap data = localisedReceiptBuilder.orderPaymentReceipt(object);
+                        printMainJob(data);
+                        break;
+                }
+            }
+        }).start();
+
+
+
+
+
+
     }
 
     public  void printOrderPayment(final ReceiptObject object){
@@ -804,18 +755,18 @@ printOrderPayment(_object);
         new Thread(new Runnable() {
             @Override
             public void run() {
-                switch (getActiveHubtelDevice().getDeviceManufacturer()){
+                switch (printerUtilities.getActiveHubtelDevice(prefs).getDeviceManufacturer()){
 
 
                     case "Epson":
 
 
-                        //LocalisedReceiptBuilder localisedReceiptBuilder1 = new LocalisedReceiptBuilder(activity);
-                        //Bitmap _data = localisedReceiptBuilder1.orderPaymentReceipt(object);
-                      //  createReceiptData(_data);
+                        LocalisedReceiptBuilder localisedReceiptBuilder1 = new LocalisedReceiptBuilder(activity);
+                        Bitmap _data = localisedReceiptBuilder1.orderPaymentReceipt(object);
+                        createReceiptData(_data);
 
 
-                        printData(getActiveHubtelDevice());
+                        printData(printerUtilities.getActiveHubtelDevice(prefs));
 
 
                        delegate.printingCompletedResult("Epson receipt not supported for now ");
@@ -938,7 +889,7 @@ printOrderPayment(_object);
     private void searchEpsonPrinters(){
 
 
-
+         initEpsonPrinter();
 
         try {
 
@@ -980,71 +931,22 @@ printOrderPayment(_object);
         return builder.getCommands();
     }
 
-    private void saveActivePrinterModel(int index, PrinterModel settings) {
-        if (printermodelList.size() > 1) {
-            printermodelList.remove(index);
-        }
-
-        printermodelList.add(index, settings);
 
 
-        prefs.edit()
-                .putString(PREF_KEY_PRINTER_SETTINGS_JSON, JsonUtils.createJsonStringOfPrinterSettingList(printermodelList))
-                .apply();
-    }
 
 
-    private void setActiveHubtelDevice(HubtelDeviceInfo device){
 
 
-        Log.d("debug",JsonUtils.createJsonStringOfActiveHubtelDevices(device));
-
-    prefs.edit()
-            .putString(PREF_KEY_ACTIVE_HUBTEL_DEVICE, JsonUtils.createJsonStringOfActiveHubtelDevices(device))
-            .apply();
-      }
-
-    public HubtelDeviceInfo getActiveHubtelDevice(){
 
 
-Log.d("Debug",JsonUtils.createJsonStringOfActiveHubtelDevices(prefs.getString(PREF_KEY_ACTIVE_HUBTEL_DEVICE, "")).toString());
-
-        return JsonUtils.createJsonStringOfActiveHubtelDevices(prefs.getString(PREF_KEY_ACTIVE_HUBTEL_DEVICE, ""));
-
-    }
 
 
-    public PrinterModel getSavedPrinterModel() {
-        if (printermodelList.isEmpty()) {
-            return null;
-        }
-
-        return printermodelList.get(0);
-    }
-
-    public PrinterModel getSavedPrinterModel(int index) {
-        if (printermodelList.isEmpty() || (printermodelList.size() - 1) < index) {
-            return null;
-        }
-
-        return printermodelList.get(index);
-    }
 
     public List<PrinterModel> getPrinterSettingsList() {
         return printermodelList;
     }
 
-    public void storeAllReceiptSettings(int allReceiptSettings) {
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(mContext);
 
-        prefs.edit()
-                .putInt(PREF_KEY_ALLRECEIPTS_SETTINGS, allReceiptSettings)
-                .apply();
-    }
-
-    public int getAllReceiptSetting() {
-        return mAllReceiptSettings;
-    }
 
 
 
