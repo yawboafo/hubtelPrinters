@@ -113,7 +113,7 @@ public class PrinterManager {
 
 
 
-       //   initEpsonPrinter();
+        initEpsonPrinter();
 
 
 
@@ -276,7 +276,7 @@ public class PrinterManager {
 
                 setActiveHubtelDevice(portInfo);
 
-                switch (getActiveHubtelDevice().getDeviceManufacturer()){
+                switch (portInfo.getDeviceManufacturer()){
 
 
                     case "Epson":
@@ -810,15 +810,15 @@ printOrderPayment(_object);
                     case "Epson":
 
 
-                        //LocalisedReceiptBuilder localisedReceiptBuilder1 = new LocalisedReceiptBuilder(activity);
-                        //Bitmap _data = localisedReceiptBuilder1.orderPaymentReceipt(object);
-                      //  createReceiptData(_data);
+                        LocalisedReceiptBuilder localisedReceiptBuilder1 = new LocalisedReceiptBuilder(activity);
+                        Bitmap _data = localisedReceiptBuilder1.orderPaymentReceipt(object);
+                        createReceiptData(_data);
 
 
                         printData(getActiveHubtelDevice());
 
 
-                       delegate.printingCompletedResult("Epson receipt not supported for now ");
+                       //delegate.printingCompletedResult("Epson receipt not supported for now ");
 
                         break;
                     case "Star":
@@ -1079,7 +1079,7 @@ Log.d("Debug",JsonUtils.createJsonStringOfActiveHubtelDevices(prefs.getString(PR
             hubtelDeviceInfo.setTarget(deviceInfo.getTarget());
             hubtelDeviceInfo.setBdAddress(deviceInfo.getBdAddress());
             hubtelDeviceInfo.setDeviceManufacturer("Epson");
-
+            hubtelDeviceInfo.setPortName(deviceInfo.getTarget());
 
 
 
