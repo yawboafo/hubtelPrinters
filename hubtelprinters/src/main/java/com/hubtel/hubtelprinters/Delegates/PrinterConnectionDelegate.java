@@ -1,4 +1,4 @@
-package com.hubtel.hubtelprinters;
+package com.hubtel.hubtelprinters.Delegates;
 
 import com.hubtel.hubtelprinters.receiptbuilder.HubtelDeviceInfo;
 

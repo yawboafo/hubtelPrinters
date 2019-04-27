@@ -19,6 +19,9 @@ import com.epson.epos2.Epos2Exception;
 import com.epson.epos2.printer.Printer;
 import com.epson.epos2.printer.PrinterStatusInfo;
 import com.epson.epos2.printer.ReceiveListener;
+import com.hubtel.hubtelprinters.Delegates.PrinterConnectionDelegate;
+import com.hubtel.hubtelprinters.Delegates.PrinterManagerDelegate;
+import com.hubtel.hubtelprinters.Delegates.PrinterSeachDelegate;
 import com.hubtel.hubtelprinters.printerCore.Communication;
 import com.hubtel.hubtelprinters.printerCore.PrinterConstants;
 import com.hubtel.hubtelprinters.printerCore.PrinterModel;
@@ -69,6 +72,8 @@ public class PrinterManager {
     private  List<HubtelDeviceInfo> hubtelDeviceInfoList;
     private static HubtelDeviceInfo activeHubtelDevice;
     public PrinterManagerDelegate delegate=null;
+    public PrinterSeachDelegate seachDelegate=null;
+    public PrinterConnectionDelegate connectionDelegate=null;
     private Printer mPrinter = null;
     private PrinterModel printerModel;
     SharedPreferences prefs;
@@ -111,12 +116,6 @@ public class PrinterManager {
             printerModel = getSavedPrinterModel();
         }
 
-
-
-        initEpsonPrinter();
-
-
-
         try{
             activeHubtelDevice = getActiveHubtelDevice();
 
@@ -124,6 +123,12 @@ public class PrinterManager {
 
 
         }
+
+        initEpsonPrinter();
+
+
+
+
     }
 
 
@@ -284,7 +289,11 @@ public class PrinterManager {
                         Runnable task = new Runnable() {
                             @Override
                             public void run() {
-                                connectEpsonPrinterRaw(portInfo);
+
+
+                                PrinterConnectionTask task1 = new PrinterConnectionTask(activity);
+                                task1.connectEpsonPrinter(portInfo,connectionDelegate,epSonconnectionListener);
+                               // connectEpsonPrinterRaw(portInfo);
                             }
                         };
                         task.run();
@@ -311,46 +320,46 @@ public class PrinterManager {
         boolean isBeginTransaction = false;
         delegate.printerConnectionBegan();
         if (mPrinter == null) {
-            return false;
-        }
+        return false;
+    }
 
         try {
 
-            mPrinter.setConnectionEventListener(epSonconnectionListener);
-            mPrinter.connect((deviceInfo.getTarget()), Printer.PARAM_DEFAULT);
+        mPrinter.setConnectionEventListener(epSonconnectionListener);
+        mPrinter.connect((deviceInfo.getTarget()), Printer.PARAM_DEFAULT);
 
-            delegate.printerConnectionSuccess(deviceInfo);
-        }
+        delegate.printerConnectionSuccess(deviceInfo);
+    }
         catch (Exception e) {
 
 
-            delegate.printerConnectionFailed(e.getLocalizedMessage() + "Epson connection error");
+        delegate.printerConnectionFailed(e.getLocalizedMessage() + "Epson connection error");
 
-            return false;
-        }
+        return false;
+    }
 
         try {
-            mPrinter.beginTransaction();
-            isBeginTransaction = true;
-        }
+        mPrinter.beginTransaction();
+        isBeginTransaction = true;
+    }
         catch (Exception e) {
 
-            delegate.printerConnectionFailed(e.getLocalizedMessage() + "Epson beginTransaction error");
+        delegate.printerConnectionFailed(e.getLocalizedMessage() + "Epson beginTransaction error");
 
-        }
+    }
 
         if (isBeginTransaction == false) {
-            try {
-                mPrinter.disconnect();
-            }
-            catch (Epos2Exception e) {
-                // Do nothing
-                return false;
-            }
+        try {
+            mPrinter.disconnect();
         }
+        catch (Epos2Exception e) {
+            // Do nothing
+            return false;
+        }
+    }
 
         return true;
-    }
+}
 
     private void connectToStarPrinter(HubtelDeviceInfo portInfo){
 
@@ -410,8 +419,13 @@ public class PrinterManager {
 
 
 
-            searchEpsonPrinters();
-            searchStarPrinters();
+
+
+            PrinterSeachTask printerSeachTask = new PrinterSeachTask(activity);
+
+            printerSeachTask.searchEpsonPrinters(mDiscoveryListener,seachDelegate);
+           // searchEpsonPrinters();
+            //searchStarPrinters();
         }
 
 
@@ -1088,7 +1102,9 @@ Log.d("Debug",JsonUtils.createJsonStringOfActiveHubtelDevices(prefs.getString(PR
 
             }else{
                 hubtelDeviceInfoList.add(hubtelDeviceInfo);
-                delegate.printerSearchSuccess(hubtelDeviceInfoList);
+
+                if(seachDelegate!=null)
+                seachDelegate.printerSearchCompleted(hubtelDeviceInfoList);
             }
 
 

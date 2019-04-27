@@ -18,11 +18,11 @@ import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.hubtel.hubtelprinters.Delegates.PrinterConnectionDelegate;
+import com.hubtel.hubtelprinters.Delegates.PrinterSeachDelegate;
 import com.hubtel.hubtelprinters.receiptbuilder.CardDetails;
-import com.hubtel.hubtelprinters.printerCore.Communication;
 import com.hubtel.hubtelprinters.receiptbuilder.HubtelDeviceInfo;
 import com.hubtel.hubtelprinters.PrinterManager;
-import com.hubtel.hubtelprinters.PrinterManagerDelegate;
 
 import com.hubtel.hubtelprinters.receiptbuilder.ReceiptObject;
 import com.hubtel.hubtelprinters.receiptbuilder.ReceiptOrderItem;
@@ -30,19 +30,27 @@ import com.hubtel.hubtelprinters.receiptbuilder.ReceiptOrderItem;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MainActivity extends AppCompatActivity implements PrinterManagerDelegate {
+public class MainActivity extends AppCompatActivity implements PrinterSeachDelegate, PrinterConnectionDelegate {
     PrinterManager printerManager;
     private static final int REQUEST_PERMISSION = 100;
     private ListView listView;
     private DeviceAdapter mAdapter;
-
+   TextView textView ;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
         printerManager = new PrinterManager(MainActivity.this);
-        printerManager.delegate = MainActivity.this;
+        printerManager.seachDelegate = MainActivity.this;
+        printerManager.connectionDelegate = MainActivity.this;
+
+        requestRuntimePermission();
+
+
+        Log.d("Debug","Active device " + printerManager.getActiveHubtelDevice().getHumanReadableName());
+
+        textView = (TextView)findViewById(R.id.textView);
         listView = (ListView) findViewById(R.id.listview);
         listView.setClickable(true);
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -57,16 +65,13 @@ public class MainActivity extends AppCompatActivity implements PrinterManagerDel
 
              }
          });
-        requestRuntimePermission();
+
 
 
         Button button2 = (Button)findViewById(R.id.button2);
         button2.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-
-
-
 
 
                 printsomething();
@@ -158,12 +163,9 @@ public class MainActivity extends AppCompatActivity implements PrinterManagerDel
 
     }
 
-    @Override
-    public void printerSearchBegan() {
 
-    }
 
-    @Override
+   /** @Override
     public void printerSearchSuccess(final List<HubtelDeviceInfo> hubtelDeviceInfoList) {
 
 
@@ -195,73 +197,13 @@ public class MainActivity extends AppCompatActivity implements PrinterManagerDel
 
 
     }
-
-    @Override
-    public void printerSearchSuccess(HubtelDeviceInfo hubtelDeviceInfo) {
-        final List<HubtelDeviceInfo> list = new ArrayList<>();
-        list.add(hubtelDeviceInfo);
-
-
-        MainActivity.this.runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
+**/
 
 
 
 
 
-                mAdapter = new DeviceAdapter(MainActivity.this,list);
-                listView.setAdapter(mAdapter);
 
-            }
-        });
-
-        //printerManager.connectToPrinter(hubtelDeviceInfo);
-        Log.d("Debug info","Single devive found "+ hubtelDeviceInfo.getPortName());
-    }
-
-
-    @Override
-    public void printerSearchFailed(String error) {
-        Log.d("DebugPrinter","Printer failed "+ error);
-    }
-
-    @Override
-    public void printerSearchReturnZeroResults() {
-        Log.d("DebugPrinter","Printer failed  to connect with nothing");
-    }
-
-    @Override
-    public void printerConnectionBegan() {
-
-    }
-
-    @Override
-    public void printerConnectionSuccess(HubtelDeviceInfo deviceInfo) {
-
-        TextView view = (TextView) findViewById(R.id.textView);
-        view.setText("Connected to "+deviceInfo.getHumanReadableName() + " Printer");
-
-    }
-
-
-
-    @Override
-    public void printerConnectionFailed(String withError) {
-
-    }
-
-    @Override
-    public void printingCompletedResult(Communication.Result communicateResult) {
-
-
-        if (communicateResult == Communication.Result.Success){
-
-            printerManager.openCashDrawer();
-        }
-
-
-    }
 
     @Override
     protected void onActivityResult(int requestCode, final int resultCode, final Intent data) {
@@ -276,25 +218,9 @@ public class MainActivity extends AppCompatActivity implements PrinterManagerDel
         }
     }
 
-    @Override
-    public void cashDrawertatusReport(Communication.Result communicateResult) {
 
-    }
 
-    @Override
-    public void printingCompletedResult(String communicateResult) {
 
-    }
-
-    @Override
-    public void printingBegan(HubtelDeviceInfo deviceInfo) {
-
-    }
-
-    @Override
-    public void printingFailed(String error) {
-
-    }
 
     void printsomething(){
 
@@ -378,4 +304,53 @@ public class MainActivity extends AppCompatActivity implements PrinterManagerDel
      }
 
 
+    @Override
+    public void printerSearchBegan() {
+
+    }
+
+    @Override
+    public void printerSearchFailed(String error) {
+
+    }
+
+    @Override
+    public void printerSearchCompleted(final List<HubtelDeviceInfo> devices) {
+
+        MainActivity.this.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+
+
+
+                mAdapter = new DeviceAdapter(MainActivity.this,devices);
+                listView.setAdapter(mAdapter);
+
+            }
+        });
+
+    }
+
+
+    @Override
+    public void printerConnectionBegan(HubtelDeviceInfo deviceInfo) {
+
+        textView.setText("Connecting to " + deviceInfo.getHumanReadableName());
+
+    }
+
+    @Override
+    public void printerConnectionFailed(HubtelDeviceInfo deviceInfo, String error) {
+        textView.setText("Connecting to " + deviceInfo.getHumanReadableName() + " failed ");
+    }
+
+    @Override
+    public void printerConnectionSuccess(HubtelDeviceInfo deviceInfo) {
+        textView.setText("connected to " + deviceInfo.getHumanReadableName());
+    }
+
+    @Override
+    public void printerConnectionFailed(String error) {
+
+    }
 }
