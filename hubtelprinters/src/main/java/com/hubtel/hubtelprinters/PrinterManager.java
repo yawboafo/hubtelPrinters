@@ -46,18 +46,19 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import static com.hubtel.hubtelprinters.printerCore.PrinterConstants.PREF_KEY_ACTIVE_HUBTEL_DEVICE;
+import static com.hubtel.hubtelprinters.printerCore.PrinterConstants.PREF_KEY_ALLRECEIPTS_SETTINGS;
+import static com.hubtel.hubtelprinters.printerCore.PrinterConstants.PREF_KEY_PRINTER_SETTINGS_JSON;
+
 
 public class PrinterManager {
 
 
-    public static final String PREF_KEY_PRINTER_SETTINGS_JSON = "pref_key_printer_settings_json";
-    public static final String PREF_KEY_ALLRECEIPTS_SETTINGS  = "pref_key_allreceipts_settings";
-    public static final String PREF_KEY_ACTIVE_HUBTEL_DEVICE  = "pref_key_hubtel_device_json";
+
     private Context mContext;
     private List<PrinterModel> printermodelList;
     private int mAllReceiptSettings;
     private FilterOption mFilterOption = null;
-
 
     private int       mModelIndex;
     private String    mPortName;
@@ -200,14 +201,15 @@ public class PrinterManager {
 
         try {
 
-
+            Discovery.stop();
+            mPrinter.disconnect();
 
             mPrinter.setReceiveEventListener(null);
             mPrinter.setConnectionEventListener(null);
             mPrinter.setStatusChangeEventListener(null);
 
-            Discovery.stop();
-            mPrinter.disconnect();
+
+
         }
         catch (Epos2Exception e) {
 
@@ -720,7 +722,7 @@ printOrderPayment(_object);
             @Override
             protected void onPreExecute() {
                 mTryConnect = true;
-               delegate.printerConnectionBegan();
+                delegate.printerConnectionBegan();
             }
 
             @Override
@@ -1027,8 +1029,7 @@ Log.d("Debug",JsonUtils.createJsonStringOfActiveHubtelDevices(prefs.getString(PR
 
     }
 
-
-    public PrinterModel getSavedPrinterModel() {
+    public PrinterModel getSavedPrinterModel( ) {
         if (printermodelList.isEmpty()) {
             return null;
         }
