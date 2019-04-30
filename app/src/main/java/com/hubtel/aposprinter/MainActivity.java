@@ -20,6 +20,7 @@ import android.widget.TextView;
 
 import com.hubtel.hubtelprinters.Delegates.PrinterConnectionDelegate;
 import com.hubtel.hubtelprinters.Delegates.PrinterSeachDelegate;
+import com.hubtel.hubtelprinters.Delegates.PrintingTaskDelegate;
 import com.hubtel.hubtelprinters.receiptbuilder.CardDetails;
 import com.hubtel.hubtelprinters.receiptbuilder.HubtelDeviceInfo;
 import com.hubtel.hubtelprinters.PrinterManager;
@@ -30,7 +31,7 @@ import com.hubtel.hubtelprinters.receiptbuilder.ReceiptOrderItem;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MainActivity extends AppCompatActivity implements PrinterSeachDelegate, PrinterConnectionDelegate {
+public class MainActivity extends AppCompatActivity implements PrinterSeachDelegate, PrinterConnectionDelegate, PrintingTaskDelegate {
     PrinterManager printerManager;
     private static final int REQUEST_PERMISSION = 100;
     private ListView listView;
@@ -44,7 +45,7 @@ public class MainActivity extends AppCompatActivity implements PrinterSeachDeleg
         printerManager = new PrinterManager(MainActivity.this);
         printerManager.seachDelegate = MainActivity.this;
         printerManager.connectionDelegate = MainActivity.this;
-
+       printerManager.printingTaskDelegate = MainActivity.this;
         requestRuntimePermission();
 
 
@@ -351,6 +352,26 @@ public class MainActivity extends AppCompatActivity implements PrinterSeachDeleg
 
     @Override
     public void printerConnectionFailed(String error) {
+
+    }
+
+    @Override
+    public void printingTaskBegan(HubtelDeviceInfo deviceInfo) {
+
+    }
+
+    @Override
+    public void printingTaskFailed(HubtelDeviceInfo deviceInfo, String error) {
+
+    }
+
+    @Override
+    public void printingTaskCompleted(HubtelDeviceInfo deviceInfo, Boolean results) {
+
+    }
+
+    @Override
+    public void printingTaskFailed(String error) {
 
     }
 }

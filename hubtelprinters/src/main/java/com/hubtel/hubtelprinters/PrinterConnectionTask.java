@@ -110,7 +110,7 @@ public class PrinterConnectionTask {
 
 
     }
-    private void connectToStarPrinter(List<PrinterModel> printermodelList,HubtelDeviceInfo deviceInfo , PrinterConnectionDelegate delegate, SharedPreferences prefs){
+    public void connectToStarPrinter(List<PrinterModel> printermodelList,HubtelDeviceInfo deviceInfo , PrinterConnectionDelegate delegate, SharedPreferences prefs){
 
         if(delegate !=null)
             delegate.printerConnectionBegan(deviceInfo);

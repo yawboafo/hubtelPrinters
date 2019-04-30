@@ -22,6 +22,7 @@ import com.epson.epos2.printer.ReceiveListener;
 import com.hubtel.hubtelprinters.Delegates.PrinterConnectionDelegate;
 import com.hubtel.hubtelprinters.Delegates.PrinterManagerDelegate;
 import com.hubtel.hubtelprinters.Delegates.PrinterSeachDelegate;
+import com.hubtel.hubtelprinters.Delegates.PrintingTaskDelegate;
 import com.hubtel.hubtelprinters.printerCore.Communication;
 import com.hubtel.hubtelprinters.printerCore.PrinterConstants;
 import com.hubtel.hubtelprinters.printerCore.PrinterModel;
@@ -75,6 +76,7 @@ public class PrinterManager {
     public PrinterManagerDelegate delegate=null;
     public PrinterSeachDelegate seachDelegate=null;
     public PrinterConnectionDelegate connectionDelegate=null;
+    public PrintingTaskDelegate printingTaskDelegate=null;
     private Printer mPrinter = null;
     private PrinterModel printerModel;
     SharedPreferences prefs;
@@ -202,12 +204,15 @@ public class PrinterManager {
         try {
 
             Discovery.stop();
-            mPrinter.disconnect();
 
-            mPrinter.setReceiveEventListener(null);
-            mPrinter.setConnectionEventListener(null);
-            mPrinter.setStatusChangeEventListener(null);
 
+            if(mPrinter != null) {
+                mPrinter.disconnect();
+
+                mPrinter.setReceiveEventListener(null);
+                mPrinter.setConnectionEventListener(null);
+                mPrinter.setStatusChangeEventListener(null);
+            }
 
 
         }
@@ -303,7 +308,11 @@ public class PrinterManager {
 
                         break;
                     case "Star":
-                        connectToStarPrinter(portInfo);
+
+                        PrinterConnectionTask task1 = new PrinterConnectionTask(activity);
+                        task1.connectToStarPrinter(printermodelList,portInfo,connectionDelegate,prefs);
+                      //  (List<PrinterModel> printermodelList,HubtelDeviceInfo deviceInfo , PrinterConnectionDelegate delegate, SharedPreferences prefs)
+                       // connectToStarPrinter(portInfo);
                         break;
                 }
 
@@ -426,6 +435,7 @@ public class PrinterManager {
             PrinterSeachTask printerSeachTask = new PrinterSeachTask(activity);
 
             printerSeachTask.searchEpsonPrinters(mDiscoveryListener,seachDelegate);
+            printerSeachTask.searchStarPrinters(seachDelegate);
            // searchEpsonPrinters();
             //searchStarPrinters();
         }
@@ -817,36 +827,8 @@ printOrderPayment(_object);
     public  void printOrderPayment(final ReceiptObject object){
 
 
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                switch (getActiveHubtelDevice().getDeviceManufacturer()){
-
-
-                    case "Epson":
-
-
-                        LocalisedReceiptBuilder localisedReceiptBuilder1 = new LocalisedReceiptBuilder(activity);
-                        Bitmap _data = localisedReceiptBuilder1.orderPaymentReceipt(object);
-                        createReceiptData(_data);
-
-
-                        printData(getActiveHubtelDevice());
-
-
-                       //delegate.printingCompletedResult("Epson receipt not supported for now ");
-
-                        break;
-                    case "Star":
-                        LocalisedReceiptBuilder localisedReceiptBuilder = new LocalisedReceiptBuilder(activity);
-                        Bitmap data = localisedReceiptBuilder.orderPaymentReceipt(object);
-                        printMainJob(data);
-                        break;
-                }
-            }
-        }).start();
-
-
+        PrintingTask task = new PrintingTask(activity,getActiveHubtelDevice(),prefs,printingTaskDelegate,initEpsonPrinter());
+        task.printOrderPayment(getActiveHubtelDevice(),object);
 
 
 
@@ -1069,6 +1051,8 @@ Log.d("Debug",JsonUtils.createJsonStringOfActiveHubtelDevices(prefs.getString(PR
         @Override
         public void onStatus(boolean result, Communication.Result communicateResult) {
 
+
+            if(delegate!=null)
             delegate.printingCompletedResult(communicateResult);
 
 
@@ -1099,13 +1083,13 @@ Log.d("Debug",JsonUtils.createJsonStringOfActiveHubtelDevices(prefs.getString(PR
 
 
 
-            if(hubtelDeviceInfoList.contains(hubtelDeviceInfo)){
+            if( HubtelDeviceHelper.hubtelDeviceInfoList.contains(hubtelDeviceInfo)){
 
             }else{
-                hubtelDeviceInfoList.add(hubtelDeviceInfo);
+                HubtelDeviceHelper.hubtelDeviceInfoList.add(hubtelDeviceInfo);
 
                 if(seachDelegate!=null)
-                seachDelegate.printerSearchCompleted(hubtelDeviceInfoList);
+                seachDelegate.printerSearchCompleted( HubtelDeviceHelper.hubtelDeviceInfoList);
             }
 
 

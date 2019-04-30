@@ -58,6 +58,14 @@ public class HubtelDeviceHelper {
     }
 
 
+
+
+    static List<PrinterModel> getprintermodelList(SharedPreferences prefs) {
+
+        return JsonUtils.createPrinterSettingListFromJsonString(prefs.getString(PREF_KEY_PRINTER_SETTINGS_JSON, ""));
+    }
+
+
     static void saveActivePrinterModel(  List<PrinterModel> printermodelList, int index, PrinterModel settings, SharedPreferences prefs) {
 
         if (printermodelList.size() > 1) {
