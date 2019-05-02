@@ -3,8 +3,13 @@ package com.hubtel.hubtelprinters;
 import android.app.Activity;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.util.Log;
 
+import com.epson.epos2.Epos2Exception;
 import com.epson.epos2.printer.Printer;
+import com.epson.epos2.printer.PrinterStatusInfo;
+import com.epson.epos2.printer.ReceiveListener;
 import com.hubtel.hubtelprinters.Delegates.PrintingTaskDelegate;
 import com.hubtel.hubtelprinters.printerCore.Communication;
 import com.hubtel.hubtelprinters.printerCore.PrinterModel;
@@ -52,7 +57,9 @@ public class PrintingTask {
 
                         LocalisedReceiptBuilder localisedReceiptBuilder1 = new LocalisedReceiptBuilder(activity);
                         Bitmap _data = localisedReceiptBuilder1.orderPaymentReceipt(object);
-                        createReceiptData4Epson(_data);
+                      //  createReceiptData4Epson(_data);
+
+                        createReceiptData();
 
 
                         printEpsonData(deviceInfo);
@@ -89,6 +96,8 @@ public class PrintingTask {
         builder.endDocument();
         Communication.sendCommands(this, builder.getCommands(), HubtelDeviceHelper.getSavedPrinterModel(printermodelList).getPortName(), HubtelDeviceHelper.getSavedPrinterModel(printermodelList).getPortSettings(), 10000, activity, mCallback);
     }
+
+
     private boolean printEpsonData(HubtelDeviceInfo deviceInfo) {
 
 
@@ -100,16 +109,16 @@ public class PrintingTask {
             return false;
         }
 
-      /*  if (!connectPrinter(deviceInfo)) {
+      if (!connectPrinter(deviceInfo)) {
             return false;
         }
 
         PrinterStatusInfo status = mPrinter.getStatus();
 
-        dispPrinterWarnings(status);
+       // dispPrinterWarnings(status);
 
         if (!isPrintable(status)) {
-            delegate.printingCompletedResult(status + "sendData");
+           // delegate.printingCompletedResult(status + "sendData");
             try {
                 mPrinter.disconnect();
             }
@@ -117,7 +126,7 @@ public class PrintingTask {
                 // Do nothing
             }
             return false;
-        }*/
+        }
 
         try {
 
@@ -140,6 +149,67 @@ public class PrintingTask {
 
         return true;
     }
+
+
+    private boolean connectPrinter(HubtelDeviceInfo deviceInfo) {
+        boolean isBeginTransaction = false;
+
+        if (mPrinter == null) {
+            return false;
+        }
+
+      /**  try {
+            Log.d("Debug",deviceInfo.getTarget());
+            mPrinter.connect(deviceInfo.getTarget(), Printer.PARAM_DEFAULT);
+        }
+        catch (Exception e) {
+
+            return false;
+        }**/
+
+        try {
+            mPrinter.endTransaction();
+            mPrinter.beginTransaction();
+            isBeginTransaction = true;
+        }
+        catch (Exception e) {
+
+
+            Log.e("debugErr",e.toString());
+        }
+
+        if (isBeginTransaction == false) {
+            try {
+                mPrinter.disconnect();
+            }
+            catch (Epos2Exception e) {
+                // Do nothing
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+
+    private boolean isPrintable(PrinterStatusInfo status) {
+        if (status == null) {
+            return false;
+        }
+
+        if (status.getConnection() == Printer.FALSE) {
+            return false;
+        }
+        else if (status.getOnline() == Printer.FALSE) {
+            return false;
+        }
+        else {
+
+        }
+
+        return true;
+    }
+
     private boolean createReceiptData4Epson(ReceiptObject object) {
         if(delegate!=null)
             delegate.printingTaskBegan(deviceInfo);
@@ -191,9 +261,21 @@ public class PrintingTask {
     }
     private boolean createReceiptData4Epson(Bitmap bitmap) {
 
+        try {
+            mPrinter = new Printer(0, 0, activity);
+            mPrinter.setReceiveEventListener(epSonreceiveListener);
+           // mPrinter.setConnectionEventListener(epSonconnectionListener);
+
+
+        } catch (Exception e) {
+
+        }
+
+
         if(delegate!=null)
             delegate.printingTaskBegan(deviceInfo);
         if (mPrinter == null) {
+            delegate.printingTaskFailed("Failed to init printer object");
             return false;
         }
 
@@ -244,4 +326,131 @@ public class PrintingTask {
 
         }
     };
+
+    final ReceiveListener epSonreceiveListener = new ReceiveListener() {
+        @Override
+        public void onPtrReceive(Printer printer, int i, PrinterStatusInfo printerStatusInfo, String s) {
+
+
+            if(delegate!=null)
+                delegate.printingTaskCompleted(deviceInfo,true);
+
+            //delegate.printingCompletedResult("Epson Print Success");
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                  //  disconnectPrinter();
+                }
+            }).start();
+
+            Log.d("Debug epson",s +"was connected "+printer.getAdmin());
+        }
+    };
+
+
+    private boolean createReceiptData() {
+        String method = "";
+      //  Bitmap logoData = BitmapFactory.decodeResource(getResources(), R.drawable.store);
+        StringBuilder textData = new StringBuilder();
+        final int barcodeWidth = 2;
+        final int barcodeHeight = 100;
+
+        if (mPrinter == null) {
+            return false;
+        }
+
+        try {
+            method = "addTextAlign";
+            mPrinter.addTextAlign(Printer.ALIGN_CENTER);
+
+            method = "addImage";
+           /** mPrinter.addImage(logoData, 0, 0,
+                    logoData.getWidth(),
+                    logoData.getHeight(),
+                    Printer.COLOR_1,
+                    Printer.MODE_MONO,
+                    Printer.HALFTONE_DITHER,
+                    Printer.PARAM_DEFAULT,
+                    Printer.COMPRESS_AUTO);**/
+
+            method = "addFeedLine";
+            mPrinter.addFeedLine(1);
+            textData.append("THE STORE 123 (555) 555 – 5555\n");
+            textData.append("STORE DIRECTOR – John Smith\n");
+            textData.append("\n");
+            textData.append("7/01/07 16:58 6153 05 0191 134\n");
+            textData.append("ST# 21 OP# 001 TE# 01 TR# 747\n");
+            textData.append("------------------------------\n");
+            method = "addText";
+            mPrinter.addText(textData.toString());
+            textData.delete(0, textData.length());
+
+            textData.append("400 OHEIDA 3PK SPRINGF  9.99 R\n");
+            textData.append("410 3 CUP BLK TEAPOT    9.99 R\n");
+            textData.append("445 EMERIL GRIDDLE/PAN 17.99 R\n");
+            textData.append("438 CANDYMAKER ASSORT   4.99 R\n");
+            textData.append("474 TRIPOD              8.99 R\n");
+            textData.append("433 BLK LOGO PRNTED ZO  7.99 R\n");
+            textData.append("458 AQUA MICROTERRY SC  6.99 R\n");
+            textData.append("493 30L BLK FF DRESS   16.99 R\n");
+            textData.append("407 LEVITATING DESKTOP  7.99 R\n");
+            textData.append("441 **Blue Overprint P  2.99 R\n");
+            textData.append("476 REPOSE 4PCPM CHOC   5.49 R\n");
+            textData.append("461 WESTGATE BLACK 25  59.99 R\n");
+            textData.append("------------------------------\n");
+            method = "addText";
+            mPrinter.addText(textData.toString());
+            textData.delete(0, textData.length());
+
+            textData.append("SUBTOTAL                160.38\n");
+            textData.append("TAX                      14.43\n");
+            method = "addText";
+            mPrinter.addText(textData.toString());
+            textData.delete(0, textData.length());
+
+            method = "addTextSize";
+            mPrinter.addTextSize(2, 2);
+            method = "addText";
+            mPrinter.addText("TOTAL    174.81\n");
+            method = "addTextSize";
+            mPrinter.addTextSize(1, 1);
+            method = "addFeedLine";
+            mPrinter.addFeedLine(1);
+
+            textData.append("CASH                    200.00\n");
+            textData.append("CHANGE                   25.19\n");
+            textData.append("------------------------------\n");
+            method = "addText";
+            mPrinter.addText(textData.toString());
+            textData.delete(0, textData.length());
+
+            textData.append("Purchased item total number\n");
+            textData.append("Sign Up and Save !\n");
+            textData.append("With Preferred Saving Card\n");
+            method = "addText";
+            mPrinter.addText(textData.toString());
+            textData.delete(0, textData.length());
+            method = "addFeedLine";
+            mPrinter.addFeedLine(2);
+
+            method = "addBarcode";
+            mPrinter.addBarcode("01209457",
+                    Printer.BARCODE_CODE39,
+                    Printer.HRI_BELOW,
+                    Printer.FONT_A,
+                    barcodeWidth,
+                    barcodeHeight);
+
+            method = "addCut";
+            mPrinter.addCut(Printer.CUT_FEED);
+        }
+        catch (Exception e) {
+           // ShowMsg.showException(e, method, mContext);
+            return false;
+        }
+
+        textData = null;
+
+        return true;
+    }
 }

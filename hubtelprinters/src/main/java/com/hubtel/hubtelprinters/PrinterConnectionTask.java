@@ -88,7 +88,7 @@ public class PrinterConnectionTask {
 
         }
 
-        try {
+       /** try {
             mPrinter.beginTransaction();
             isBeginTransaction = true;
         }
@@ -96,13 +96,13 @@ public class PrinterConnectionTask {
             if(delegate !=null)
             delegate.printerConnectionFailed(e.getLocalizedMessage() + "Epson beginTransaction error");
 
-        }
+        }**/
 
         if (isBeginTransaction == false) {
             try {
-                mPrinter.disconnect();
+                //mPrinter.disconnect();
             }
-            catch (Epos2Exception e) {
+            catch (Exception e) {
                 // Do nothing
 
             }

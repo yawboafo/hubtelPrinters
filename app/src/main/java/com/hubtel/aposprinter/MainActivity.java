@@ -45,11 +45,10 @@ public class MainActivity extends AppCompatActivity implements PrinterSeachDeleg
         printerManager = new PrinterManager(MainActivity.this);
         printerManager.seachDelegate = MainActivity.this;
         printerManager.connectionDelegate = MainActivity.this;
-       printerManager.printingTaskDelegate = MainActivity.this;
+        printerManager.printingTaskDelegate = MainActivity.this;
         requestRuntimePermission();
 
 
-        Log.d("Debug","Active device " + printerManager.getActiveHubtelDevice().getHumanReadableName());
 
         textView = (TextView)findViewById(R.id.textView);
         listView = (ListView) findViewById(R.id.listview);
@@ -318,6 +317,8 @@ public class MainActivity extends AppCompatActivity implements PrinterSeachDeleg
     @Override
     public void printerSearchCompleted(final List<HubtelDeviceInfo> devices) {
 
+
+        Log.d("debug","size sizes "+ devices.size());
         MainActivity.this.runOnUiThread(new Runnable() {
             @Override
             public void run() {
