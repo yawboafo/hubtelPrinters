@@ -295,7 +295,7 @@ public class MainActivity extends AppCompatActivity implements PrinterSeachDeleg
          Bitmap qrcodescaled = Bitmap.createScaledBitmap(qrcode, 250, 250, true);
 
 
-         _object.setLogo(bMapScaled);
+        // _object.setLogo(bMapScaled);
           _object.setQrcode(qrcodescaled);
 
 

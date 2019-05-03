@@ -142,7 +142,7 @@ public class PrinterManager {
             mPrinter = new Printer(0, 0, activity);
 
             mPrinter.setReceiveEventListener(epSonreceiveListener);
-            mPrinter.setConnectionEventListener(epSonconnectionListener);
+           // mPrinter.setConnectionEventListener(epSonconnectionListener);
 
 
         } catch (Exception e) {
@@ -296,30 +296,23 @@ public class PrinterManager {
                         Runnable task = new Runnable() {
                             @Override
                             public void run() {
-
-
                                 PrinterConnectionTask task1 = new PrinterConnectionTask(activity);
                                 task1.connectEpsonPrinter(portInfo,connectionDelegate,epSonconnectionListener);
-                               // connectEpsonPrinterRaw(portInfo);
                             }
                         };
                         task.run();
-
-
                         break;
                     case "Star":
 
                         PrinterConnectionTask task1 = new PrinterConnectionTask(activity);
                         task1.connectToStarPrinter(printermodelList,portInfo,connectionDelegate,prefs);
-                      //  (List<PrinterModel> printermodelList,HubtelDeviceInfo deviceInfo , PrinterConnectionDelegate delegate, SharedPreferences prefs)
-                       // connectToStarPrinter(portInfo);
+
                         break;
                 }
 
 
 
 
-        //activeHubtelDevice = portInfo;
 
 
 

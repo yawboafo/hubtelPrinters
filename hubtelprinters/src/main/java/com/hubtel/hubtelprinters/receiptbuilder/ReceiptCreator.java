@@ -532,9 +532,7 @@ public class ReceiptCreator {
         if (align != null) {
             drawerImage.setAlign(align);
         }
-
-
-            listItens.add(drawerImage);
+        listItens.add(drawerImage);
 
         return this;
     }
