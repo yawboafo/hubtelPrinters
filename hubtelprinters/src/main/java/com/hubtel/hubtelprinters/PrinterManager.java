@@ -1,16 +1,13 @@
 package com.hubtel.hubtelprinters;
 
-import android.Manifest;
 import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.os.AsyncTask;
 import android.preference.PreferenceManager;
-import android.support.v4.content.ContextCompat;
 import android.util.Log;
 
 
@@ -20,19 +17,15 @@ import com.epson.epos2.printer.Printer;
 import com.epson.epos2.printer.PrinterStatusInfo;
 import com.epson.epos2.printer.ReceiveListener;
 import com.hubtel.hubtelprinters.Delegates.PrinterConnectionDelegate;
-import com.hubtel.hubtelprinters.Delegates.PrinterManagerDelegate;
 import com.hubtel.hubtelprinters.Delegates.PrinterSeachDelegate;
 import com.hubtel.hubtelprinters.Delegates.PrintingTaskDelegate;
 import com.hubtel.hubtelprinters.printerCore.Communication;
 import com.hubtel.hubtelprinters.printerCore.PrinterConstants;
 import com.hubtel.hubtelprinters.printerCore.PrinterModel;
 import com.hubtel.hubtelprinters.printerCore.PrinterModelCapacity;
-import com.hubtel.hubtelprinters.receiptbuilder.CardDetails;
 import com.hubtel.hubtelprinters.receiptbuilder.HubtelDeviceInfo;
 import com.hubtel.hubtelprinters.receiptbuilder.ReceiptCreator;
-import com.hubtel.hubtelprinters.receiptbuilder.LocalisedReceiptBuilder;
 import com.hubtel.hubtelprinters.receiptbuilder.ReceiptObject;
-import com.hubtel.hubtelprinters.receiptbuilder.ReceiptOrderItem;
 import com.starmicronics.stario.PortInfo;
 import com.starmicronics.stario.StarIOPort;
 import com.starmicronics.stario.StarIOPortException;
@@ -44,7 +37,6 @@ import com.epson.epos2.discovery.FilterOption;
 import com.epson.epos2.discovery.DeviceInfo;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import static com.hubtel.hubtelprinters.printerCore.PrinterConstants.PREF_KEY_ACTIVE_HUBTEL_DEVICE;
@@ -73,7 +65,7 @@ public class PrinterManager {
     private List<PortInfo> portList;
     private  List<HubtelDeviceInfo> hubtelDeviceInfoList;
     private static HubtelDeviceInfo activeHubtelDevice;
-    public PrinterManagerDelegate delegate=null;
+    //public PrinterManagerDelegate delegate=null;
     public PrinterSeachDelegate seachDelegate=null;
     public PrinterConnectionDelegate connectionDelegate=null;
     public PrintingTaskDelegate printingTaskDelegate=null;
@@ -93,33 +85,37 @@ public class PrinterManager {
 
     public  PrinterManager(){}
 
-    public PrinterManager(Activity activity){
+    public PrinterManager(Activity _activity){
 
 
 
-        portList = Collections.emptyList();
+        portList = new ArrayList<PortInfo>();
         hubtelDeviceInfoList = new ArrayList<>();
-        this.activity = activity;
-        mContext = activity;
-
-        prefs = PreferenceManager.getDefaultSharedPreferences(mContext);
-
-         if (!prefs.contains(PREF_KEY_PRINTER_SETTINGS_JSON)) {
-             prefs.edit()
-                     .clear()
-                     .apply();
-         }
-
-           printermodelList = JsonUtils.createPrinterSettingListFromJsonString(prefs.getString(PREF_KEY_PRINTER_SETTINGS_JSON, ""));
+        this.activity = _activity;
+        mContext = _activity;
 
 
-
-        if (printermodelList.size() > 0){
-
-            printerModel = getSavedPrinterModel();
-        }
 
         try{
+
+
+            prefs = PreferenceManager.getDefaultSharedPreferences(mContext);
+
+            if (!prefs.contains(PREF_KEY_PRINTER_SETTINGS_JSON)) {
+                prefs.edit()
+                        .clear()
+                        .apply();
+            }
+
+            printermodelList = JsonUtils.createPrinterSettingListFromJsonString(prefs.getString(PREF_KEY_PRINTER_SETTINGS_JSON, ""));
+
+
+
+            if (printermodelList.size() > 0){
+
+                printerModel = getSavedPrinterModel();
+            }
+
             activeHubtelDevice = getActiveHubtelDevice();
 
         }catch (Exception e){
@@ -127,7 +123,7 @@ public class PrinterManager {
 
         }
 
-        initEpsonPrinter();
+        // initEpsonPrinter();
 
 
 
@@ -142,7 +138,7 @@ public class PrinterManager {
             mPrinter = new Printer(0, 0, activity);
 
             mPrinter.setReceiveEventListener(epSonreceiveListener);
-           // mPrinter.setConnectionEventListener(epSonconnectionListener);
+            mPrinter.setConnectionEventListener(epSonconnectionListener);
 
 
         } catch (Exception e) {
@@ -236,14 +232,14 @@ public class PrinterManager {
             mPrinter.endTransaction();
         }
         catch (final Exception e) {
-          delegate.printerConnectionFailed("Failed to disconnect Printer");
+            //delegate.printerConnectionFailed("Failed to disconnect Printer");
         }
 
         try {
             mPrinter.disconnect();
         }
         catch (final Exception e) {
-            delegate.printerConnectionFailed("Failed to disconnect Printer");
+            //  delegate.printerConnectionFailed("Failed to disconnect Printer");
         }
 
         finalizeObject();
@@ -265,455 +261,448 @@ public class PrinterManager {
 
     public StarIOPort getPort() {
 
-         return  port;
-     }
+        return  port;
+    }
 
-     public boolean isPortOpened(){
+    public boolean isPortOpened(){
 
-         if(port == null)
-             return  false;
-         else
-             return true;
+        if(port == null)
+            return  false;
+        else
+            return true;
 
-     }
+    }
 
     public  String getPrinterName(){
 
 
-         return
-                 this.mPortName.substring(PrinterConstants.IF_TYPE_BLUETOOTH.length());
+        return
+                this.mPortName.substring(PrinterConstants.IF_TYPE_BLUETOOTH.length());
     }
 
     public  void connectToPrinter(final  HubtelDeviceInfo portInfo){
 
-                setActiveHubtelDevice(portInfo);
+        setActiveHubtelDevice(portInfo);
 
-                switch (portInfo.getDeviceManufacturer()){
+        switch (portInfo.getDeviceManufacturer()){
 
 
-                    case "Epson":
+            case "Epson":
 
-                        Runnable task = new Runnable() {
-                            @Override
-                            public void run() {
-                                PrinterConnectionTask task1 = new PrinterConnectionTask(activity);
-                                task1.connectEpsonPrinter(portInfo,connectionDelegate,epSonconnectionListener);
-                            }
-                        };
-                        task.run();
-                        break;
-                    case "Star":
+                Runnable task = new Runnable() {
+                    @Override
+                    public void run() {
+
 
                         PrinterConnectionTask task1 = new PrinterConnectionTask(activity);
-                        task1.connectToStarPrinter(printermodelList,portInfo,connectionDelegate,prefs);
-
-                        break;
-                }
-
-
-
+                        task1.connectEpsonPrinter(portInfo,connectionDelegate,epSonconnectionListener);
+                        // connectEpsonPrinterRaw(portInfo);
+                    }
+                };
+                task.run();
 
 
+                break;
+            case "Star":
 
-
-
-    }
-
-
-    private boolean connectEpsonPrinterRaw(HubtelDeviceInfo deviceInfo) {
-        boolean isBeginTransaction = false;
-        delegate.printerConnectionBegan();
-        if (mPrinter == null) {
-        return false;
-    }
-
-        try {
-
-        mPrinter.setConnectionEventListener(epSonconnectionListener);
-        mPrinter.connect((deviceInfo.getTarget()), Printer.PARAM_DEFAULT);
-
-        delegate.printerConnectionSuccess(deviceInfo);
-    }
-        catch (Exception e) {
-
-
-        delegate.printerConnectionFailed(e.getLocalizedMessage() + "Epson connection error");
-
-        return false;
-    }
-
-        try {
-        mPrinter.beginTransaction();
-        isBeginTransaction = true;
-    }
-        catch (Exception e) {
-
-        delegate.printerConnectionFailed(e.getLocalizedMessage() + "Epson beginTransaction error");
-
-    }
-
-        if (isBeginTransaction == false) {
-        try {
-            mPrinter.disconnect();
+                PrinterConnectionTask task1 = new PrinterConnectionTask(activity);
+                task1.connectToStarPrinter(printermodelList,portInfo,connectionDelegate,prefs);
+                //  (List<PrinterModel> printermodelList,HubtelDeviceInfo deviceInfo , PrinterConnectionDelegate delegate, SharedPreferences prefs)
+                // connectToStarPrinter(portInfo);
+                break;
         }
-        catch (Epos2Exception e) {
-            // Do nothing
-            return false;
-        }
+
+
+
+
+
+
+
+
     }
 
-        return true;
-}
 
-    private void connectToStarPrinter(HubtelDeviceInfo portInfo){
+    /** private boolean connectEpsonPrinterRaw(HubtelDeviceInfo deviceInfo) {
+     boolean isBeginTransaction = false;
+     delegate.printerConnectionBegan();
+     if (mPrinter == null) {
+     return false;
+     }
 
+     try {
 
-        delegate.printerConnectionBegan();
-        this.mManufacturer = portInfo.getDeviceManufacturer();
-        this.mPortName = portInfo.getPortName();
-        this.mModelName = portInfo.getPortName().substring(PrinterConstants.IF_TYPE_BLUETOOTH.length());
-        this.mModelIndex = PrinterModelCapacity.getModel( this.mModelName);
-        this.mPortSettings = PrinterModelCapacity.getPortSettings(mModelIndex);
-        this.mDrawerOpenStatus = true ;
-        if(portInfo.getMacAddress().startsWith("(") && portInfo.getMacAddress().endsWith(")"))
-            this.mMacAddress = portInfo.getMacAddress().substring(1, portInfo.getMacAddress().length() - 1);
-        else
-            this.mMacAddress = portInfo.getMacAddress();
+     mPrinter.setConnectionEventListener(epSonconnectionListener);
+     mPrinter.connect((deviceInfo.getTarget()), Printer.PARAM_DEFAULT);
 
+     delegate.printerConnectionSuccess(deviceInfo);
+     }
+     catch (Exception e) {
 
 
+     delegate.printerConnectionFailed(e.getLocalizedMessage() + "Epson connection error");
 
-        printerModel = new PrinterModel(this.mModelIndex,
-                this.mManufacturer,
-                this.mPortName,
-                this.mPortSettings,
-                this.mMacAddress,
-                this.mModelName,
-                true,
-                PrinterConstants.PAPER_SIZE_FOUR_INCH);
+     return false;
+     }
+
+     try {
+     mPrinter.beginTransaction();
+     isBeginTransaction = true;
+     }
+     catch (Exception e) {
+
+     delegate.printerConnectionFailed(e.getLocalizedMessage() + "Epson beginTransaction error");
+
+     }
+
+     if (isBeginTransaction == false) {
+     try {
+     mPrinter.disconnect();
+     }
+     catch (Epos2Exception e) {
+     // Do nothing
+     return false;
+     }
+     }
+
+     return true;
+     }
+
+     private void connectToStarPrinter(HubtelDeviceInfo portInfo){
 
 
-        saveActivePrinterModel(
-                mPrinterSettingIndex,
-                printerModel
-        );
+     delegate.printerConnectionBegan();
+     this.mManufacturer = portInfo.getDeviceManufacturer();
+     this.mPortName = portInfo.getPortName();
+     this.mModelName = portInfo.getPortName().substring(PrinterConstants.IF_TYPE_BLUETOOTH.length());
+     this.mModelIndex = PrinterModelCapacity.getModel( this.mModelName);
+     this.mPortSettings = PrinterModelCapacity.getPortSettings(mModelIndex);
+     this.mDrawerOpenStatus = true ;
+     if(portInfo.getMacAddress().startsWith("(") && portInfo.getMacAddress().endsWith(")"))
+     this.mMacAddress = portInfo.getMacAddress().substring(1, portInfo.getMacAddress().length() - 1);
+     else
+     this.mMacAddress = portInfo.getMacAddress();
 
 
 
-        printerModel = getSavedPrinterModel();
+
+     printerModel = new PrinterModel(this.mModelIndex,
+     this.mManufacturer,
+     this.mPortName,
+     this.mPortSettings,
+     this.mMacAddress,
+     this.mModelName,
+     true,
+     PrinterConstants.PAPER_SIZE_FOUR_INCH);
 
 
-        if (port == null)
-            rawConnectToStarPrinters(portInfo);
-        else
-            delegate.printerConnectionSuccess(portInfo);
-    }
+     saveActivePrinterModel(
+     mPrinterSettingIndex,
+     printerModel
+     );
 
-    public void searchPrinter(){
+
+
+     printerModel = getSavedPrinterModel();
+
+
+     if (port == null)
+     rawConnectToStarPrinters(portInfo);
+     else
+     delegate.printerConnectionSuccess(portInfo);
+     }
+     **/
+    public void searchPrinter() {
 
 
 
 
         hubtelDeviceInfoList = new ArrayList<>();
-
-        if (ContextCompat.checkSelfPermission(activity, Manifest.permission.BLUETOOTH)
-                != PackageManager.PERMISSION_GRANTED) {
-            delegate.printerSearchFailed("Bluetooth Permission not granted");
-        }else{
+        PrinterSeachTask printerSeachTask = new PrinterSeachTask(activity);
+//        printerSeachTask.searchEpsonPrinters(mDiscoveryListener,seachDelegate);
+        printerSeachTask.searchStarPrinters(seachDelegate);
 
 
 
-
-
-            PrinterSeachTask printerSeachTask = new PrinterSeachTask(activity);
-
-            printerSeachTask.searchEpsonPrinters(mDiscoveryListener,seachDelegate);
-            printerSeachTask.searchStarPrinters(seachDelegate);
-           // searchEpsonPrinters();
-            //searchStarPrinters();
-        }
-
-
-
-
-
-        }
-
-    private boolean isPrintable(PrinterStatusInfo status) {
-        if (status == null) {
-            return false;
-        }
-
-        if (status.getConnection() == Printer.FALSE) {
-            return false;
-        }
-        else if (status.getOnline() == Printer.FALSE) {
-            return false;
-        }
-        else {
-
-        }
-
-        return true;
-    }
-    public void printSample(){
-
-        ReceiptObject _object = new ReceiptObject();
-
-
-        List<ReceiptOrderItem> items = new ArrayList<>();
-        items.add(new ReceiptOrderItem("21","Yam Balls banana ","GHS 12.00"));
-        items.add(new ReceiptOrderItem("3","Yam Balls pizza ","GHS 300.00"));
-        items.add(new ReceiptOrderItem("331","Rabbit ","GHS 300.00"));
-        items.add(new ReceiptOrderItem("21","The men of the league ","GHS 300.00"));
-        items.add(new ReceiptOrderItem("10","Yam Balls ","GHS 300.00"));
-        items.add(new ReceiptOrderItem("1","Yam Balls banana ","GHS 300.00"));
-        items.add(new ReceiptOrderItem("1","Yam Balls pizza ","GHS 300.00"));
-        items.add(new ReceiptOrderItem("1","Rabbit ","GHS 300.00"));
-        items.add(new ReceiptOrderItem("1","The men of the league ","GHS 300.00"));
-        items.add(new ReceiptOrderItem("1","Yam Balls ","GHS 300.00"));
-        items.add(new ReceiptOrderItem("1","Yam Balls banana ","GHS 1,300.00"));
-        items.add(new ReceiptOrderItem("1","Yam Balls pizza ","GHS 1,30,000.00"));
-        items.add(new ReceiptOrderItem("1","Rabbit ","GHS 30,000.00"));
-        items.add(new ReceiptOrderItem("1","The men of the league ","GHS 300.00"));
-        items.add(new ReceiptOrderItem("1","Yam Balls ","GHS 300.00"));
-        items.add(new ReceiptOrderItem("1","Yam Balls banana ","GHS 300.00"));
-        items.add(new ReceiptOrderItem("1","Yam Balls pizza ","GHS 300.00"));
-        items.add(new ReceiptOrderItem("1","Rabbit ","GHS 300.00"));
-        items.add(new ReceiptOrderItem("1","The men of the league ","GHS 300.00"));
-        items.add(new ReceiptOrderItem("1","Yam Balls ","GHS 300.00"));
-
-
-
-
-
-
-        _object.setBusinessName("Hubtel Limited");
-        _object.setBusinessBranch("Main");
-        _object.setBusinessPhone( "0540256631");
-        _object.setBusinessAddress("Kokomlemle/Accra");
-        _object.setBusinessWebUrl( "www.hubtel.com");
-        _object.setPaymentDate("December 5, 2018, 2:20 am");
-        _object.setPaymentReceiptNumber( "099121-1212-9821");
-        _object.setPaymentType("Cash");
-        _object.setItems(items);
-        _object.setSubtotal("GHS 1,090.00");
-        _object.setDiscount("GHS 0.00");
-        _object.setTax("GHS 0.00");
-        _object.setGratisPoint("0.0 pts");
-        _object.setAmountPaid("GHS 1,000.00");
-        _object.setSubtotal("GHS 1,090.00");
-        _object.setChange("GHS 90.00");
-        _object.setTotal("GHS 1,090.00");
-        _object.setEmployeeName("Apostle Boafo");
-        _object.setCustomer("0540256631");
-        _object.setDuplicate(false);
-
-        CardDetails cardDetails = new CardDetails();
-        cardDetails.setAuthorization("98989");
-        cardDetails.setMid("191910022");
-        cardDetails.setCard("98911****89");
-        cardDetails.setSchema("Visa");
-        cardDetails.setTransID("32HDD333D999D");
-        cardDetails.setTid("ZHUB232");
-
-
-        _object.setCardDetails(cardDetails);
-
-
-
-
-printOrderPayment(_object);
 
     }
+    /**
+     private boolean isPrintable(PrinterStatusInfo status) {
+     if (status == null) {
+     return false;
+     }
 
-    private boolean createReceiptData(ReceiptObject object) {
+     if (status.getConnection() == Printer.FALSE) {
+     return false;
+     }
+     else if (status.getOnline() == Printer.FALSE) {
+     return false;
+     }
+     else {
 
+     }
 
-        final int pageAreaHeight = 500;
-        final int pageAreaWidth = 500;
+     return true;
+     }
+     public void printSample(){
 
-        if (mPrinter == null) {
-            return false;
-        }
-
-        try {
-
-
-/*
-
-            mPrinter.addPageBegin();
-            mPrinter.addPageArea(0, 0, bitmap.getWidth(), bitmap.getHeight() + 50);
-            mPrinter.addPagePosition(0, bitmap.getHeight());
-
-
-
-
-            mPrinter.addImage(
-                    bitmap, 0, 0,
-                    bitmap.getWidth(),
-                    bitmap.getHeight(),
-                    Printer.PARAM_DEFAULT,
-                    Printer.PARAM_DEFAULT,
-                    Printer.PARAM_DEFAULT,
-                    Printer.PARAM_DEFAULT,
-                    Printer.PARAM_DEFAULT);
-
-*/
-
-            mPrinter.addPageEnd();
-
-            mPrinter.addCut(Printer.CUT_FEED);
-        }
-        catch (Exception e) {
-
-            delegate.printingFailed(e.getLocalizedMessage());
-            return false;
-        }
+     ReceiptObject _object = new ReceiptObject();
 
 
-
-        return true;
-    }
-    private boolean createReceiptData(Bitmap bitmap) {
-
-
-        if (mPrinter == null) {
-            return false;
-        }
-
-        try {
-
-
-
-            mPrinter.addPageBegin();
-            mPrinter.addPageArea(0, 0, bitmap.getWidth(), bitmap.getHeight() + 50);
-            mPrinter.addPagePosition(0, bitmap.getHeight());
+     List<ReceiptOrderItem> items = new ArrayList<>();
+     items.add(new ReceiptOrderItem("21","Yam Balls banana ","GHS 12.00"));
+     items.add(new ReceiptOrderItem("3","Yam Balls pizza ","GHS 300.00"));
+     items.add(new ReceiptOrderItem("331","Rabbit ","GHS 300.00"));
+     items.add(new ReceiptOrderItem("21","The men of the league ","GHS 300.00"));
+     items.add(new ReceiptOrderItem("10","Yam Balls ","GHS 300.00"));
+     items.add(new ReceiptOrderItem("1","Yam Balls banana ","GHS 300.00"));
+     items.add(new ReceiptOrderItem("1","Yam Balls pizza ","GHS 300.00"));
+     items.add(new ReceiptOrderItem("1","Rabbit ","GHS 300.00"));
+     items.add(new ReceiptOrderItem("1","The men of the league ","GHS 300.00"));
+     items.add(new ReceiptOrderItem("1","Yam Balls ","GHS 300.00"));
+     items.add(new ReceiptOrderItem("1","Yam Balls banana ","GHS 1,300.00"));
+     items.add(new ReceiptOrderItem("1","Yam Balls pizza ","GHS 1,30,000.00"));
+     items.add(new ReceiptOrderItem("1","Rabbit ","GHS 30,000.00"));
+     items.add(new ReceiptOrderItem("1","The men of the league ","GHS 300.00"));
+     items.add(new ReceiptOrderItem("1","Yam Balls ","GHS 300.00"));
+     items.add(new ReceiptOrderItem("1","Yam Balls banana ","GHS 300.00"));
+     items.add(new ReceiptOrderItem("1","Yam Balls pizza ","GHS 300.00"));
+     items.add(new ReceiptOrderItem("1","Rabbit ","GHS 300.00"));
+     items.add(new ReceiptOrderItem("1","The men of the league ","GHS 300.00"));
+     items.add(new ReceiptOrderItem("1","Yam Balls ","GHS 300.00"));
 
 
 
 
-         mPrinter.addImage(
-                    bitmap, 0, 0,
-                    bitmap.getWidth(),
-                    bitmap.getHeight(),
-                    Printer.PARAM_DEFAULT,
-                    Printer.PARAM_DEFAULT,
-                    Printer.PARAM_DEFAULT,
-                    Printer.PARAM_DEFAULT,
-                    Printer.PARAM_DEFAULT);
 
 
-            mPrinter.addPageEnd();
+     _object.setBusinessName("Hubtel Limited");
+     _object.setBusinessBranch("Main");
+     _object.setBusinessPhone( "0540256631");
+     _object.setBusinessAddress("Kokomlemle/Accra");
+     _object.setBusinessWebUrl( "www.hubtel.com");
+     _object.setPaymentDate("December 5, 2018, 2:20 am");
+     _object.setPaymentReceiptNumber( "099121-1212-9821");
+     _object.setPaymentType("Cash");
+     _object.setItems(items);
+     _object.setSubtotal("GHS 1,090.00");
+     _object.setDiscount("GHS 0.00");
+     _object.setTax("GHS 0.00");
+     _object.setGratisPoint("0.0 pts");
+     _object.setAmountPaid("GHS 1,000.00");
+     _object.setSubtotal("GHS 1,090.00");
+     _object.setChange("GHS 90.00");
+     _object.setTotal("GHS 1,090.00");
+     _object.setEmployeeName("Apostle Boafo");
+     _object.setCustomer("0540256631");
+     _object.setDuplicate(false);
 
-            mPrinter.addCut(Printer.CUT_FEED);
-        }
-        catch (Exception e) {
-
-            delegate.printingFailed(e.getLocalizedMessage());
-            return false;
-        }
-
-
-
-        return true;
-    }
-
-    private boolean printData(HubtelDeviceInfo deviceInfo) {
+     CardDetails cardDetails = new CardDetails();
+     cardDetails.setAuthorization("98989");
+     cardDetails.setMid("191910022");
+     cardDetails.setCard("98911****89");
+     cardDetails.setSchema("Visa");
+     cardDetails.setTransID("32HDD333D999D");
+     cardDetails.setTid("ZHUB232");
 
 
-
-        delegate.printingBegan(deviceInfo);
-
-        if (mPrinter == null) {
-
-            delegate.printingFailed("Failed to print to  epson printer ");
-            return false;
-        }
-
-      /*  if (!connectPrinter(deviceInfo)) {
-            return false;
-        }
-
-        PrinterStatusInfo status = mPrinter.getStatus();
-
-        dispPrinterWarnings(status);
-
-        if (!isPrintable(status)) {
-            delegate.printingCompletedResult(status + "sendData");
-            try {
-                mPrinter.disconnect();
-            }
-            catch (Exception ex) {
-                // Do nothing
-            }
-            return false;
-        }*/
-
-        try {
-
-            delegate.printingBegan(deviceInfo);
-            mPrinter.sendData(Printer.PARAM_DEFAULT);
-        }
-        catch (Exception e) {
-
-            delegate.printingCompletedResult(e + "sendData");
-
-            try {
-                mPrinter.disconnect();
-            }
-            catch (Exception ex) {
-                // Do nothing
-            }
-            return false;
-        }
-
-        return true;
-    }
-    private void dispPrinterWarnings(PrinterStatusInfo status) {
-
-        String warningsMsg = "";
-
-        if (status == null) {
-            return;
-        }
-
-        if (status.getPaper() == Printer.PAPER_NEAR_END) {
-            warningsMsg += activity.getString(R.string.handlingmsg_warn_receipt_near_end);
-        }
-
-        if (status.getBatteryLevel() == Printer.BATTERY_LEVEL_1) {
-            warningsMsg += activity.getString(R.string.handlingmsg_warn_battery_near_end);
-        }
+     _object.setCardDetails(cardDetails);
 
 
 
-        delegate.printingCompletedResult(warningsMsg);
-    }
 
+     printOrderPayment(_object);
+
+     }
+
+     private boolean createReceiptData(ReceiptObject object) {
+
+
+     final int pageAreaHeight = 500;
+     final int pageAreaWidth = 500;
+
+     if (mPrinter == null) {
+     return false;
+     }
+
+     try {
+
+
+     /*
+
+     mPrinter.addPageBegin();
+     mPrinter.addPageArea(0, 0, bitmap.getWidth(), bitmap.getHeight() + 50);
+     mPrinter.addPagePosition(0, bitmap.getHeight());
+
+
+
+
+     mPrinter.addImage(
+     bitmap, 0, 0,
+     bitmap.getWidth(),
+     bitmap.getHeight(),
+     Printer.PARAM_DEFAULT,
+     Printer.PARAM_DEFAULT,
+     Printer.PARAM_DEFAULT,
+     Printer.PARAM_DEFAULT,
+     Printer.PARAM_DEFAULT);
+
+
+
+     mPrinter.addPageEnd();
+
+     mPrinter.addCut(Printer.CUT_FEED);
+     }
+     catch (Exception e) {
+
+     delegate.printingFailed(e.getLocalizedMessage());
+     return false;
+     }
+
+
+
+     return true;
+     }
+     private boolean createReceiptData(Bitmap bitmap) {
+
+
+     if (mPrinter == null) {
+     return false;
+     }
+
+     try {
+
+
+
+     mPrinter.addPageBegin();
+     mPrinter.addPageArea(0, 0, bitmap.getWidth(), bitmap.getHeight() + 50);
+     mPrinter.addPagePosition(0, bitmap.getHeight());
+
+
+
+
+     mPrinter.addImage(
+     bitmap, 0, 0,
+     bitmap.getWidth(),
+     bitmap.getHeight(),
+     Printer.PARAM_DEFAULT,
+     Printer.PARAM_DEFAULT,
+     Printer.PARAM_DEFAULT,
+     Printer.PARAM_DEFAULT,
+     Printer.PARAM_DEFAULT);
+
+
+     mPrinter.addPageEnd();
+
+     mPrinter.addCut(Printer.CUT_FEED);
+     }
+     catch (Exception e) {
+
+     delegate.printingFailed(e.getLocalizedMessage());
+     return false;
+     }
+
+
+
+     return true;
+     }
+
+     private boolean printData(HubtelDeviceInfo deviceInfo) {
+
+
+
+     delegate.printingBegan(deviceInfo);
+
+     if (mPrinter == null) {
+
+     delegate.printingFailed("Failed to print to  epson printer ");
+     return false;
+     }
+
+     /*  if (!connectPrinter(deviceInfo)) {
+     return false;
+     }
+
+     PrinterStatusInfo status = mPrinter.getStatus();
+
+     dispPrinterWarnings(status);
+
+     if (!isPrintable(status)) {
+     delegate.printingCompletedResult(status + "sendData");
+     try {
+     mPrinter.disconnect();
+     }
+     catch (Exception ex) {
+     // Do nothing
+     }
+     return false;
+     }
+
+     try {
+
+     delegate.printingBegan(deviceInfo);
+     mPrinter.sendData(Printer.PARAM_DEFAULT);
+     }
+     catch (Exception e) {
+
+     delegate.printingCompletedResult(e + "sendData");
+
+     try {
+     mPrinter.disconnect();
+     }
+     catch (Exception ex) {
+     // Do nothing
+     }
+     return false;
+     }
+
+     return true;
+     }
+     private void dispPrinterWarnings(PrinterStatusInfo status) {
+
+     String warningsMsg = "";
+
+     if (status == null) {
+     return;
+     }
+
+     if (status.getPaper() == Printer.PAPER_NEAR_END) {
+     warningsMsg += activity.getString(R.string.handlingmsg_warn_receipt_near_end);
+     }
+
+     if (status.getBatteryLevel() == Printer.BATTERY_LEVEL_1) {
+     warningsMsg += activity.getString(R.string.handlingmsg_warn_battery_near_end);
+     }
+
+
+
+     delegate.printingCompletedResult(warningsMsg);
+     }
+     **/
     public void openCashDrawer(){
 
-            ICommandBuilder.PeripheralChannel channel = ICommandBuilder.PeripheralChannel.No1;
-            StarIoExt.Emulation emulation = PrinterModelCapacity.getEmulation(getSavedPrinterModel().getModelIndex());
+        ICommandBuilder.PeripheralChannel channel = ICommandBuilder.PeripheralChannel.No1;
+        StarIoExt.Emulation emulation = PrinterModelCapacity.getEmulation(getSavedPrinterModel().getModelIndex());
 
 
-            byte[] data = openCashDrawerCommand(emulation, channel);
-
-
-
-            Communication.sendCommands(this, data, getSavedPrinterModel().getPortName(), getSavedPrinterModel().getPortSettings(), 10000, activity, new Communication.SendCallback() {
-                 @Override
-                 public void onStatus(boolean result, Communication.Result communicateResult) {
-
-
-                     Log.d("debug",communicateResult.toString());
+        byte[] data = openCashDrawerCommand(emulation, channel);
 
 
 
-                     delegate.cashDrawertatusReport(communicateResult);
-                 }
-             });
-        }
+        Communication.sendCommands(this, data, getSavedPrinterModel().getPortName(), getSavedPrinterModel().getPortSettings(), 10000, activity, new Communication.SendCallback() {
+            @Override
+            public void onStatus(boolean result, Communication.Result communicateResult) {
+
+
+                Log.d("debug",communicateResult.toString());
+
+
+
+
+                if(printingTaskDelegate!=null)
+                    printingTaskDelegate.cashDrawertatusReport(communicateResult);
+            }
+        });
+    }
 
     public void rawConnectToStarPrinters(final HubtelDeviceInfo hubtelDeviceInfo) {
         AsyncTask<Void, Void, StarIOPort> task = new AsyncTask<Void, Void, StarIOPort>() {
@@ -725,7 +714,7 @@ printOrderPayment(_object);
             @Override
             protected void onPreExecute() {
                 mTryConnect = true;
-                delegate.printerConnectionBegan();
+                // delegate.printerConnectionBegan();
             }
 
             @Override
@@ -744,7 +733,7 @@ printOrderPayment(_object);
                             port = StarIOPort.getPort(printerModel.getPortName(), printerModel.getPortSettings(), 10000,activity);
                         }
                     } catch (StarIOPortException e) {
-                        delegate.printerConnectionFailed(e.getLocalizedMessage());
+                        //  delegate.printerConnectionFailed(e.getLocalizedMessage());
                     }
                     return port;
 
@@ -760,7 +749,7 @@ printOrderPayment(_object);
             protected void onPostExecute(StarIOPort port) {
 
                 mTryConnect = false;
-                delegate.printerConnectionSuccess(hubtelDeviceInfo);
+                //delegate.printerConnectionSuccess(hubtelDeviceInfo);
 
             }
         };
@@ -771,7 +760,7 @@ printOrderPayment(_object);
     }
 
     public void disconnect() {
-         port = null;
+        port = null;
     }
 
     public static byte[] SampleReceipt(StarIoExt.Emulation emulation) {
@@ -787,7 +776,7 @@ printOrderPayment(_object);
                 setColor(Color.BLACK).
                 setTextSize(25).
 
-                 addTextCenter("HUBTEL LIMITED")
+                addTextCenter("HUBTEL LIMITED")
                 .addText("TESTING SOMETHING \n Pringing ")
                 .addBlankSpace(12)
                 .setTextSize(20)
@@ -820,7 +809,7 @@ printOrderPayment(_object);
     public  void printOrderPayment(final ReceiptObject object){
 
 
-        PrintingTask task = new PrintingTask(activity,getActiveHubtelDevice(),prefs,printingTaskDelegate,initEpsonPrinter());
+        PrintingTask task = new PrintingTask(activity,getActiveHubtelDevice(),prefs,printingTaskDelegate);
         task.printOrderPayment(getActiveHubtelDevice(),object);
 
 
@@ -830,135 +819,135 @@ printOrderPayment(_object);
 
     private void addStarPortToListofHubtelDeviceInfo(List<PortInfo> list){
 
-         //    public HubtelDeviceInfo(int deviceType, String target,
-         //    String deviceName, String ipAddress, String macAddress,
-         //    String bdAddress, String portName, String USBSerialNumber,
-         //    String devicemanufacturer) {
+        //    public HubtelDeviceInfo(int deviceType, String target,
+        //    String deviceName, String ipAddress, String macAddress,
+        //    String bdAddress, String portName, String USBSerialNumber,
+        //    String devicemanufacturer) {
 
-         for (PortInfo info : list)
+        for (PortInfo info : list)
 
-         {
-
-
-
-
-              if (hubtelDeviceInfoList.contains(info)){
-
-              }else {
-
-                  hubtelDeviceInfoList.add(new HubtelDeviceInfo(
-                          0,
-                          "",
-                          info.getModelName(),
-                          "",
-                          info.getMacAddress(),
-                          "",
-                          info.getPortName(),
-                          info.getUSBSerialNumber(),
-                          "Star"));
-              }
+        {
 
 
 
 
-         }
+            if (hubtelDeviceInfoList.contains(info)){
+
+            }else {
+
+                hubtelDeviceInfoList.add(new HubtelDeviceInfo(
+                        0,
+                        "",
+                        info.getModelName(),
+                        "",
+                        info.getMacAddress(),
+                        "",
+                        info.getPortName(),
+                        info.getUSBSerialNumber(),
+                        "Star"));
+            }
+
+
+
+
+        }
+
+
+    }
+
+    /**  private  void searchStarPrinters(){
+     AsyncTask<Void, Void, List<PortInfo>> task = new  AsyncTask<Void, Void, List<PortInfo>>() {
+
+
+
+
+
+
+    @Override
+    protected List<PortInfo> doInBackground(Void...params){
+
+
+    try{
+
+    delegate.printerSearchBegan();
+    portList= StarIOPort.searchPrinter("BT:");
+
+    }catch(StarIOPortException e){
+
+    delegate.printerSearchFailed(e.getLocalizedMessage());
+
+    }
+
+    return portList;
+
+    }
+
+
+    @Override
+    protected void onCancelled(){
+    super.onCancelled();
+
+    delegate.printerSearchFailed("Task Cancelled");
+    }
+
+    @Override
+    protected void onPostExecute(List<PortInfo> result){
+    super.onPostExecute(result);
+
+    addStarPortToListofHubtelDeviceInfo(result);
+
+
+
+    if(result.size() > 1) {
+
+    delegate.printerSearchSuccess(hubtelDeviceInfoList);
+    }else if (result.size() == 1) {
+
+    delegate.printerSearchSuccess(hubtelDeviceInfoList.get(0));
+    }else{
+    delegate.printerSearchReturnZeroResults();
+    }
+
+
+
+    }
+
+    };
+     task.execute();
+     }
+     private void searchEpsonPrinters(){
+
+
+
+
+     try {
+
+
+     Discovery.stop();
+
+     }
+     catch (Epos2Exception e) {
+
+     }
+
+     FilterOption mFilterOption = new FilterOption();
+     mFilterOption.setDeviceType(Discovery.TYPE_PRINTER);
+     mFilterOption.setEpsonFilter(Discovery.FILTER_NAME);
+
+     try {
+     Discovery.start(activity, mFilterOption, mDiscoveryListener);
+     }
+     catch (Exception e) {
+
 
 
      }
 
-    private  void searchStarPrinters(){
-        AsyncTask<Void, Void, List<PortInfo>> task = new  AsyncTask<Void, Void, List<PortInfo>>() {
 
 
 
-
-
-
-            @Override
-            protected List<PortInfo> doInBackground(Void...params){
-
-
-                try{
-
-                    delegate.printerSearchBegan();
-                    portList= StarIOPort.searchPrinter("BT:");
-
-                }catch(StarIOPortException e){
-
-                    delegate.printerSearchFailed(e.getLocalizedMessage());
-
-                }
-
-                return portList;
-
-            }
-
-
-            @Override
-            protected void onCancelled(){
-                super.onCancelled();
-
-                delegate.printerSearchFailed("Task Cancelled");
-            }
-
-            @Override
-            protected void onPostExecute(List<PortInfo> result){
-                super.onPostExecute(result);
-
-                addStarPortToListofHubtelDeviceInfo(result);
-
-
-
-                if(result.size() > 1) {
-
-                    delegate.printerSearchSuccess(hubtelDeviceInfoList);
-                }else if (result.size() == 1) {
-
-                    delegate.printerSearchSuccess(hubtelDeviceInfoList.get(0));
-                }else{
-                    delegate.printerSearchReturnZeroResults();
-                }
-
-
-
-            }
-
-        };
-        task.execute();
-    }
-    private void searchEpsonPrinters(){
-
-
-
-
-        try {
-
-
-            Discovery.stop();
-
-        }
-        catch (Epos2Exception e) {
-
-        }
-
-        FilterOption mFilterOption = new FilterOption();
-        mFilterOption.setDeviceType(Discovery.TYPE_PRINTER);
-        mFilterOption.setEpsonFilter(Discovery.FILTER_NAME);
-
-        try {
-            Discovery.start(activity, mFilterOption, mDiscoveryListener);
-        }
-        catch (Exception e) {
-
-
-
-        }
-
-
-
-
-    }
-
+     }
+     **/
     private static byte[] openCashDrawerCommand(StarIoExt.Emulation emulation, ICommandBuilder.PeripheralChannel channel) {
         ICommandBuilder builder = StarIoExt.createCommandBuilder(emulation);
 
@@ -990,15 +979,15 @@ printOrderPayment(_object);
 
         Log.d("debug",JsonUtils.createJsonStringOfActiveHubtelDevices(device));
 
-    prefs.edit()
-            .putString(PREF_KEY_ACTIVE_HUBTEL_DEVICE, JsonUtils.createJsonStringOfActiveHubtelDevices(device))
-            .apply();
-      }
+        prefs.edit()
+                .putString(PREF_KEY_ACTIVE_HUBTEL_DEVICE, JsonUtils.createJsonStringOfActiveHubtelDevices(device))
+                .apply();
+    }
 
     public HubtelDeviceInfo getActiveHubtelDevice(){
 
 
-Log.d("Debug",JsonUtils.createJsonStringOfActiveHubtelDevices(prefs.getString(PREF_KEY_ACTIVE_HUBTEL_DEVICE, "")).toString());
+        Log.d("Debug",JsonUtils.createJsonStringOfActiveHubtelDevices(prefs.getString(PREF_KEY_ACTIVE_HUBTEL_DEVICE, "")).toString());
 
         return JsonUtils.createJsonStringOfActiveHubtelDevices(prefs.getString(PREF_KEY_ACTIVE_HUBTEL_DEVICE, ""));
 
@@ -1045,8 +1034,8 @@ Log.d("Debug",JsonUtils.createJsonStringOfActiveHubtelDevices(prefs.getString(PR
         public void onStatus(boolean result, Communication.Result communicateResult) {
 
 
-            if(delegate!=null)
-            delegate.printingCompletedResult(communicateResult);
+            //  if(delegate!=null)
+            //  delegate.printingCompletedResult(communicateResult);
 
 
 
@@ -1082,7 +1071,7 @@ Log.d("Debug",JsonUtils.createJsonStringOfActiveHubtelDevices(prefs.getString(PR
                 HubtelDeviceHelper.hubtelDeviceInfoList.add(hubtelDeviceInfo);
 
                 if(seachDelegate!=null)
-                seachDelegate.printerSearchCompleted( HubtelDeviceHelper.hubtelDeviceInfoList);
+                    seachDelegate.printerSearchCompleted( HubtelDeviceHelper.hubtelDeviceInfoList);
             }
 
 
@@ -1095,7 +1084,7 @@ Log.d("Debug",JsonUtils.createJsonStringOfActiveHubtelDevices(prefs.getString(PR
     final ConnectionListener epSonconnectionListener = new ConnectionListener() {
         @Override
         public void onConnection(Object o, int i) {
-        Log.d("Debug epson ","device was connected : "+o.toString());
+            Log.d("Debug epson ","device was connected : "+o.toString());
         }
     };
 
@@ -1103,7 +1092,7 @@ Log.d("Debug",JsonUtils.createJsonStringOfActiveHubtelDevices(prefs.getString(PR
         @Override
         public void onPtrReceive(Printer printer, int i, PrinterStatusInfo printerStatusInfo, String s) {
 
-            delegate.printingCompletedResult("Epson Print Success");
+            printingTaskDelegate.printingTaskCompleted(getActiveHubtelDevice(),"Epson Print Success");
             new Thread(new Runnable() {
                 @Override
                 public void run() {
