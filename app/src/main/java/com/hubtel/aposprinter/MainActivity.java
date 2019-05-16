@@ -19,6 +19,8 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import com.hubtel.hubtelprinters.Delegates.PrinterConnectionDelegate;
+import com.hubtel.hubtelprinters.Delegates.PrinterSeachDelegate;
+import com.hubtel.hubtelprinters.Delegates.PrintingTaskDelegate;
 import com.hubtel.hubtelprinters.receiptbuilder.CardDetails;
 import com.hubtel.hubtelprinters.printerCore.Communication;
 import com.hubtel.hubtelprinters.receiptbuilder.HubtelDeviceInfo;
@@ -31,7 +33,7 @@ import com.hubtel.hubtelprinters.receiptbuilder.ReceiptOrderItem;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MainActivity extends AppCompatActivity implements PrinterManagerDelegate, PrinterConnectionDelegate {
+public class MainActivity extends AppCompatActivity implements  PrinterConnectionDelegate, PrinterSeachDelegate, PrintingTaskDelegate {
     PrinterManager printerManager;
     private static final int REQUEST_PERMISSION = 100;
     private ListView listView;
@@ -45,7 +47,8 @@ public class MainActivity extends AppCompatActivity implements PrinterManagerDel
         setContentView(R.layout.activity_main);
 
         printerManager = new PrinterManager(MainActivity.this);
-        printerManager.delegate = MainActivity.this;
+        printerManager.seachDelegate = MainActivity.this;
+        printerManager.printingTaskDelegate = MainActivity.this;
         printerManager.connectionDelegate = MainActivity.this;
         listView = (ListView) findViewById(R.id.listview);
         listView.setClickable(true);
@@ -158,11 +161,11 @@ public class MainActivity extends AppCompatActivity implements PrinterManagerDel
     protected void onPause() {
         super.onPause();
         printerManager.unRegisterReceiver();
-        printerManager.delegate = null;
+
 
     }
 
-    @Override
+   /** @Override
     public void printerSearchBegan() {
 
     }
@@ -314,7 +317,7 @@ public class MainActivity extends AppCompatActivity implements PrinterManagerDel
     public void printingFailed(String error) {
 
     }
-
+    **/
     void printsomething(){
 
        ReceiptObject _object = new ReceiptObject();
@@ -393,8 +396,75 @@ public class MainActivity extends AppCompatActivity implements PrinterManagerDel
 
 
 
-        printerManager.printOrderPayment(_deviceInfo,_object);
+          printerManager.printOrderPayment(_object);
+
+
+       // printerManager.printOrderPayment(_deviceInfo,_object);
      }
 
 
+    @Override
+    public void printerConnectionBegan(HubtelDeviceInfo deviceInfo) {
+
+    }
+
+    @Override
+    public void printerConnectionFailed(HubtelDeviceInfo deviceInfo, String error) {
+
+    }
+
+    @Override
+    public void printerConnectionSuccess(HubtelDeviceInfo deviceInfo) {
+
+    }
+
+    @Override
+    public void printerConnectionFailed(String error) {
+
+    }
+
+    @Override
+    public void printerSearchBegan() {
+
+    }
+
+    @Override
+    public void printerSearchFailed(String error) {
+
+    }
+
+    @Override
+    public void printerSearchCompleted(List<HubtelDeviceInfo> devices) {
+
+    }
+
+    @Override
+    public void printingTaskBegan(HubtelDeviceInfo deviceInfo) {
+
+    }
+
+    @Override
+    public void printingTaskFailed(HubtelDeviceInfo deviceInfo, String error) {
+
+    }
+
+    @Override
+    public void printingTaskCompleted(HubtelDeviceInfo deviceInfo, Boolean results) {
+
+    }
+
+    @Override
+    public void printingTaskCompleted(HubtelDeviceInfo deviceInfo, String results) {
+
+    }
+
+    @Override
+    public void printingTaskFailed(String error) {
+
+    }
+
+    @Override
+    public void cashDrawertatusReport(Communication.Result result) {
+
+    }
 }

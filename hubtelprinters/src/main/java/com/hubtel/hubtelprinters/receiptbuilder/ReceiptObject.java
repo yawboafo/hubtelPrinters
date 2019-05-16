@@ -36,6 +36,16 @@ public class ReceiptObject {
 
     private CardDetails cardDetails;
 
+    private String netSaleTotal;
+    private String cashTotal;
+    private String mobileMoneyTotal;
+    private String cardTotal;
+    private String hubtelTotal;
+    private Boolean isOrder;
+    private String orderNumber;
+
+    private  List<ReceiptOrderDayItem> itemsPicked;
+    private  List<ReceiptOrderDayItem> dayItemList;
 
     public ReceiptObject(){}
 
@@ -187,13 +197,102 @@ public class ReceiptObject {
     }
 
     public Bitmap getLogo() {
+
+
+
         return logo;
     }
 
     public void setLogo(Bitmap logo) {
-        this.logo = logo;
+
+        if(logo ==null){
+
+
+        }else{
+            this.logo = logo;
+        }
+
     }
 
+    public Boolean getIsOrder() {
+        return isOrder;
+    }
+
+    public void setIsOrder(Boolean order) {
+        isOrder = order;
+    }
+
+    public String getRONumber(){
+
+
+        if (getIsOrder() == true) {
+
+
+            return  "Order No : " + getOrderNumber()+"\n";
+        }else {
+
+            return  "Receipt No : " + getPaymentReceiptNumber()+"\n";
+
+        }
+
+    }
+
+
+    public String getOrderNumber() {
+        return orderNumber;
+    }
+
+    public void setOrderNumber(String orderNumber) {
+        this.orderNumber = orderNumber;
+    }
+
+    public String getNetSaleTotal() {
+        return netSaleTotal;
+    }
+
+    public void setNetSaleTotal(String netSaleTotal) {
+        this.netSaleTotal = netSaleTotal;
+    }
+
+    public String getCashTotal() {
+        return cashTotal;
+    }
+
+    public void setCashTotal(String cashTotal) {
+        this.cashTotal = cashTotal;
+    }
+
+    public String getMobileMoneyTotal() {
+        return mobileMoneyTotal;
+    }
+
+    public void setMobileMoneyTotal(String mobileMoneyTotal) {
+        this.mobileMoneyTotal = mobileMoneyTotal;
+    }
+
+    public String getCardTotal() {
+        return cardTotal;
+    }
+
+    public void setCardTotal(String cardTotal) {
+        this.cardTotal = cardTotal;
+    }
+
+    public String getHubtelTotal() {
+        return hubtelTotal;
+    }
+
+    public void setHubtelTotal(String hubtelTotal) {
+        this.hubtelTotal = hubtelTotal;
+    }
+
+    public List<ReceiptOrderDayItem> getItemsPicked() {
+        return itemsPicked;
+    }
+
+    public void setItemsPicked(List<ReceiptOrderDayItem> itemsPicked) {
+        this.itemsPicked = itemsPicked;
+    }
 
     public String getCustomer() {
         return customer;
@@ -218,6 +317,14 @@ public class ReceiptObject {
 
     public void setDuplicate(boolean duplicate) {
         isDuplicate = duplicate;
+    }
+
+    public List<ReceiptOrderDayItem> getDayItemList() {
+        return dayItemList;
+    }
+
+    public void setDayItemList(List<ReceiptOrderDayItem> dayItemList) {
+        this.dayItemList = dayItemList;
     }
 }
 

@@ -42,8 +42,8 @@ public class LocalisedReceiptBuilder {
     public Bitmap orderPaymentReceipt(ReceiptObject object) {
 
 
-
-        String itemizedListHeader = String.format("%-5s %-30s %4s", "QTY", "DESCRIPTION", "AMOUNT") + "\n";
+//%-5s %-30s %4s
+        String itemizedListHeader = String.format("%-5s %-33s %4s", "QTY", "DESCRIPTION", "AMOUNT") + "\n";
 
 
 
@@ -74,9 +74,9 @@ public class LocalisedReceiptBuilder {
                 .setTextSize(19)
                 .setTypeface(getBoldTypeFace())
                 .addTextLeft("Date :  "+ object.getPaymentDate()+"\n")
-                .addTextLeft("Receipt No : "+ object.getPaymentReceiptNumber()+"\n")
+                .addTextLeft(object.getRONumber())
                 .addTextLeft("Payment Type : "+ object.getPaymentType()+"\n")
-                .addTextLeft("Customer  : "+ object.getCustomer()+"\n")
+                .addCustomerInfo(object.getCustomer())
                 .addParagraph()
                 .addLine()
                 .addParagraph()
@@ -117,57 +117,113 @@ public class LocalisedReceiptBuilder {
                 .addParagraph()
                 .addTextCenter("Processed by Hubtel")
         ;
-/*8
-
-        ReceiptCreator receiptCreator = new ReceiptCreator(570);
-        receiptCreator.setMargin(2, 2).
-                setAlign(Paint.Align.CENTER).
-                setColor(Color.BLACK).
-                setTextSize(27)
-                .setTypeface(getBoldTypeFace()).
-                addTextCenter(object.getBusinessName()+"\n")
-                .setTextSize(20)
-                .setTypeface(getNormalTypeFace())
-                .addText(object.getBusinessBranch()+"\n")
-                .addText(object.getBusinessPhone()+"\n")
-                .addText(object.getBusinessAddress()+"\n")
-                .addText(object.getBusinessWebUrl()+"\n")
-                .addParagraph()
-                .setTextSize(20)
-                .setTypeface(getBoldTypeFace())
-                .setAlign(Paint.Align.LEFT)
-                .addText("Date :  "+ object.getPaymentDate()+"\n")
-                .addText("Receipt No : "+ object.getPaymentReceiptNumber()+"\n")
-                .addText("Payment Type : "+ object.getPaymentType()+"\n")
-                .addLine()
-                .addParagraph()
-                .addTextLeft(itemizedListHeader)
-                .addParagraph()
-                .addLine()
-                .addImage(givemeListString(object.getItems()))
-                .addParagraph()
-                .addLine()
-                .addParagraph()
-                .setTypeface(getBoldTypeFace())
-                .setAlign(Paint.Align.LEFT)
-               .addTextLeft(subTotalString).
-                addTextLeft(discountString).
-                addTextLeft(taxString)
-               .addParagraph().addLine()
-               .addLine()
-               .addParagraph()
-               .addTextLeft(TotalString).
-                addTextLeft(amountendered).
-                addTextLeft(change).
-                addTextLeft(gratis_points).
-                addParagraph()
-        .addLine()
-               ;
-**/
 
 
 
         return receiptCreator.build();
+    }
+
+
+    public Bitmap endofDayReceipt(ReceiptObject object ){
+
+        ReceiptCreator receiptCreator = new ReceiptCreator(570);
+
+        receiptCreator.setMargin(1, 1).
+                setAlign(Paint.Align.CENTER).
+                setColor(Color.BLACK).
+                setTextSize(25)
+                .setTypeface(getBoldTypeFace())
+                .addLogo(object.getLogo())
+                .addTextCenter(object.getBusinessName())
+                .setTextSize(20)
+                .setTypeface(getNormalTypeFace())
+                .addTextCenter(object.getBusinessBranch()+"\n")
+                .addTextCenter(object.getBusinessPhone()+"\n")
+                .addTextCenter(object.getBusinessAddress()+"\n")
+                .addTextCenter(object.getBusinessWebUrl()+"\n")
+                .addParagraph()
+                //.addTextCenter("Sales Summary for Today , " + object.getPaymentDate())
+                .addParagraph()
+                .setTextSize(25)
+                .setTypeface(getBoldTypeFace())
+                .addTextRightAndLeft("Summary",object.getPaymentDate())
+                .addLine()
+                .addParagraph()
+                .setTextSize(20)
+                .addTextRightAndLeft("Net Sales",object.getNetSaleTotal())
+                .addLine()
+                .addParagraph()
+                .setTextSize(25)
+                .setTypeface(getBoldTypeFace())
+                .addTextLeft("Collections")
+                .addLine()
+                .addParagraph()
+                .setTextSize(20)
+                .setTypeface(getNormalTypeFace())
+                .addTextRightAndLeft("Cash",object.getCashTotal())
+                .addTextRightAndLeft("Mobile Money",object.getMobileMoneyTotal())
+                .addTextRightAndLeft("Card",object.getCardTotal())
+                .addTextRightAndLeft("Hubtel",object.getHubtelTotal())
+                .addParagraph()
+                .setTextSize(24)
+                .setTypeface(getBoldTypeFace())
+                .addLine()
+                .addParagraph()
+                .addTextRightAndLeft("Items","Count")
+                .addLine()
+                .addParagraph()
+                .setAlign(Paint.Align.LEFT)
+                .addImage(givemeItemsForEndOfDaySales(object.getDayItemList()))
+                .addParagraph()
+                .addLine()
+                .addParagraph()
+                .addTextLeft("Items Picked Up")
+                .addParagraph()
+                .addLine()
+                .addParagraph()
+                .addImage(givemeItemsForEndOfDaySales(object.getItemsPicked()))
+                .addParagraph().addLine().addParagraph()
+                .setTextSize(20)
+                .addTextCenter("Processed by Hubtel")
+                .addTextCenter("0800-222-081");
+
+
+
+
+
+
+
+        return  receiptCreator.build();
+
+    }
+
+    private Bitmap givemeItemsForEndOfDaySales(List<ReceiptOrderDayItem> items){
+
+
+        if (items == null || items.size() == 0)
+            return null;
+
+        String itemizedList = "";
+        for (ReceiptOrderDayItem item : items) {
+           /** String itemName = "";
+            if (item.getName().length() > 30)
+                itemName = item.getName().substring(0, 30) ;
+            else
+                itemName = item.getName();
+**/
+
+            //%-5s %-30.30s %-4s"
+            //itemizedList += String.format("%-5s %-27s %4s", item.getQuantity(), itemName, "  " +  item.getAmount()) + "\n";
+
+
+            itemizedList += String.format("%-42s %1s", item.getName(), "" + item.getCount()) + "\n";
+
+           // itemizedList += String.format("%-30s %1s", itemName, item.getCount())+ "\n";
+        }
+
+
+        return createBitmapFromText(itemizedList,20, PrinterConstants.PAPER_SIZE_FOUR_INCH,getNormalTypeFace());
+
     }
 
 
@@ -181,11 +237,16 @@ public class LocalisedReceiptBuilder {
         for (ReceiptOrderItem item : items) {
             String itemName = "";
             if (item.getName().length() > 30)
-                itemName = item.getName().substring(0, 27) + "...";
+                itemName = item.getName().substring(0, 30) ;
             else
                 itemName = item.getName();
 
-                itemizedList += String.format("%-5s %-27s %4s", item.getQuantity(), itemName, "  " +  item.getAmount()) + "\n";
+
+            //%-5s %-30.30s %-4s"
+                //itemizedList += String.format("%-5s %-27s %4s", item.getQuantity(), itemName, "  " +  item.getAmount()) + "\n";
+
+
+            itemizedList += String.format("%-5s %-30.30s %-4s", item.getQuantity(), itemName, "  " +  item.getAmount()) + "\n";
         }
 
 

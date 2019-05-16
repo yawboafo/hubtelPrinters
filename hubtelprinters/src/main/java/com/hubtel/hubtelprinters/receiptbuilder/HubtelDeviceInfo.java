@@ -105,7 +105,7 @@ public class HubtelDeviceInfo {
 
     public String getHumanReadableName(){
 
-        return this.deviceManufacturer + " " + this.deviceName == null || this.deviceName.isEmpty() ? this.portName : this.deviceName;
+        return this.deviceManufacturer + " " + this.deviceName == null  ? this.portName : this.deviceName;
     }
 }
 

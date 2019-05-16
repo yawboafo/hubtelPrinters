@@ -160,7 +160,7 @@ public class ReceiptCreator {
         return this;
     }
 
-    public ReceiptCreator addTextLeft(String text) {
+    public ReceiptCreator  addTextLeft(String text) {
 
 
         if ( text == null ) {
@@ -190,6 +190,35 @@ public class ReceiptCreator {
         return this;
     }
 
+    public ReceiptCreator  addCustomerInfo(String text) {
+
+
+        if ( text == null ) {
+            return  this;
+        }
+
+        if ( text.isEmpty() ) {
+            return  this;
+        }
+
+        if ( text.contains("null")) {
+            return  this;
+        }
+
+
+        CreateText drawerText = new CreateText("Customer  : "+ text +"\n");
+        drawerText.setTextSize(this.textSize);
+        drawerText.setColor(this.color);
+        drawerText.setNewLine(true);
+        if (typeface != null) {
+            drawerText.setTypeface(typeface);
+        }
+
+        drawerText.setAlign(Paint.Align.LEFT);
+
+        listItens.add(drawerText);
+        return this;
+    }
 
     public ReceiptCreator addTextLeft(String text,Boolean newline) {
 

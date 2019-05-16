@@ -22,4 +22,7 @@ public class PrinterConstants {
     public static final String IF_TYPE_BLUETOOTH = "BT:";
     public static final String IF_TYPE_USB = "USB:";
     public static final String IF_TYPE_MANUAL = "Manual:";
+    public static final String PREF_KEY_PRINTER_SETTINGS_JSON = "pref_key_printer_settings_json";
+    public static final String PREF_KEY_ALLRECEIPTS_SETTINGS  = "pref_key_allreceipts_settings";
+    public static final String PREF_KEY_ACTIVE_HUBTEL_DEVICE  = "pref_key_hubtel_device_json";
 }

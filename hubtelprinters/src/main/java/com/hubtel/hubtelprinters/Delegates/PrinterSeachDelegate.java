@@ -6,8 +6,8 @@ import java.util.List;
 
 public interface PrinterSeachDelegate {
 
-    void printerSearchBegan(HubtelDeviceInfo deviceInfo);
-    void printerSearchFailed(HubtelDeviceInfo deviceInfo,String error);
-    void printerSearchCompleted(List<HubtelDeviceInfo> devices);
+    void printerSearchBegan();
     void printerSearchFailed(String error);
+    void printerSearchCompleted(List<HubtelDeviceInfo> devices);
+
 }

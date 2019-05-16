@@ -2,6 +2,7 @@ package com.hubtel.hubtelprinters.printerCore;
 
 
 
+
 import android.support.annotation.NonNull;
 
 import com.starmicronics.stario.StarIOPort;
